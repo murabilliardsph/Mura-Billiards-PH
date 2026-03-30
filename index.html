@@ -250,6 +250,129 @@
         const msg = `MURA BILLIARDS ORDER:\nName: ${name}\nMobile: ${mobile}\nItems: ${orderData.items}\nRef: ${orderData.ref}`;
         window.location.href = `https://t.me/murabilliardph?text=${encodeURIComponent(msg)}`;
     }
+    
+<script>
+    // FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
+        authDomain: "mura-billiards-ph.firebaseapp.com",
+        projectId: "mura-billiards-ph",
+        storageBucket: "mura-billiards-ph.firebasestorage.app",
+        messagingSenderId: "959920092233",
+        appId: "1:959920092233:web:d224b24baa4f3284467b98"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let cart = [];
+    let discountAmount = 0;
+
+    // REAL-TIME REVIEWS LISTENER (Dito lalabas yung pinost mo sa Admin)
+    db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
+        const revDisplay = document.querySelector('.reviews-sec'); 
+        if(!revDisplay) return;
+        
+        // Retain the header, clear the old reviews
+        revDisplay.innerHTML = '<h2 style="font-family: Oswald; margin-bottom: 20px;">CUSTOMER REVIEWS</h2>';
+        
+        snap.forEach(doc => {
+            const r = doc.data();
+            revDisplay.innerHTML += `
+                <div class="review-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"${r.comment}"</p>
+                    <small style="color: #666;">— ${r.name} (Verified Buyer)</small>
+                </div>
+            `;
+        });
+    });
+
+    function addToCart(name, price, ship) {
+        cart.push({ id: Date.now(), name, price, ship });
+        updateCartUI();
+        toggleCart(true);
+    }
+
+    function toggleCart(show) { 
+        document.getElementById('cart-sidebar').style.right = show ? "0" : "-400px"; 
+    }
+
+    function updateArrival() {
+        const a = document.getElementById('area').value;
+        document.getElementById('arrival-msg').innerText = a === "Manila" ? "Estimated Delivery: 2-3 Days" : (a ? "Estimated Delivery: 5-7 Days" : "");
+    }
+
+    // DISCOUNT SYSTEM (Sync sa Admin 'discounts' collection)
+    async function applyPromo() {
+        const code = document.getElementById('promoCode').value.toUpperCase();
+        if(!code) { discountAmount = 0; updateCartUI(); return; }
+
+        const promoRef = db.collection("discounts").doc(code);
+        const doc = await promoRef.get();
+
+        if (doc.exists) {
+            discountAmount = doc.data().amount;
+            alert("Promo Applied! ₱" + discountAmount + " off.");
+        } else {
+            discountAmount = 0;
+            alert("Invalid Promo Code.");
+        }
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-items-list');
+        list.innerHTML = "";
+        let sub = 0, ship = 0;
+        
+        cart.forEach(i => { 
+            sub += i.price; 
+            ship += i.ship; 
+            list.innerHTML += `<div class="cart-item"><span>${i.name}</span> <span>₱${i.price.toLocaleString()}</span></div>`;
+        });
+        
+        document.getElementById('cart-count').innerText = cart.length;
+        document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
+        document.getElementById('ship-val').innerText = "₱" + ship.toLocaleString();
+        document.getElementById('disc-val').innerText = "₱" + discountAmount.toLocaleString();
+        
+        const total = (sub + ship) - discountAmount;
+        const dp = total > 0 ? total * 0.4 : 0;
+        document.getElementById('dp-val').innerText = "₱" + dp.toLocaleString();
+    }
+
+    async function finalizeOrder() {
+        const name = document.getElementById('cName').value;
+        const mobile = document.getElementById('cMobile').value;
+        const addr = document.getElementById('cAddr').value;
+        const ref = document.getElementById('refNo').value;
+        const terms = document.getElementById('terms').checked;
+
+        if(!name || !mobile || !addr || cart.length === 0 || !terms || !ref) {
+            return alert("Please complete all details, including GCash Ref and Terms.");
+        }
+
+        const orderData = {
+            customer_name: name,
+            mobile: mobile,
+            address: addr,
+            area: document.getElementById('area').value,
+            items: cart.map(i => i.name).join(", "),
+            dp_amount: document.getElementById('dp-val').innerText,
+            ref_no: ref,
+            status: "Pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            await db.collection("orders").add(orderData);
+            const msg = `MURA BILLIARDS ORDER:\nName: ${name}\nItems: ${orderData.items}\nDP Amount: ${orderData.dp_amount}\nRef: ${ref}`;
+            alert("Order Saved! Redirecting to Telegram for confirmation...");
+            window.location.href = `https://t.me/murabilliardph?text=${encodeURIComponent(msg)}`;
+        } catch(e) {
+            alert("Error sending order. Please check your connection.");
+        }
+    }
 </script>
 </body>
 </html>
