@@ -10,19 +10,15 @@
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #eeeeee; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--dark); color: var(--text); padding: 20px; }
-        
-        /* Login Overlay */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-box { background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; width: 300px; }
-
         h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 25px; text-transform: uppercase; }
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .section { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; }
         input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; }
         .btn { width: 100%; background: var(--primary); border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-top: 15px; text-transform: uppercase; }
         .btn-del { background: #ff3d00; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
-        
-        .promo-pill { background: #111; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .promo-pill, .review-item { background: #111; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
     </style>
 </head>
@@ -50,10 +46,18 @@
             </div>
 
             <div class="section">
-                <h3>Post Telegram Feedback</h3>
+                <h3>Manage Customer Reviews</h3>
                 <input type="text" id="revName" placeholder="Customer Name">
-                <textarea id="revText" placeholder="Paste review..."></textarea>
+                <select id="revItem">
+                    <option value="">-- Select Item Bought --</option>
+                    <option value="Mini Table (120x75cm)">Mini Table (120x75cm)</option>
+                    <option value="Jr. Size 4x7">Jr. Size 4x7 Table</option>
+                </select>
+                <textarea id="revText" placeholder="Paste review content..."></textarea>
                 <button class="btn" onclick="postReview()">Post Review</button>
+                
+                <h4 style="margin-top: 20px; font-size: 12px; color: var(--primary);">Posted Reviews:</h4>
+                <div id="admin-reviews-list" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
         </div>
 
@@ -64,7 +68,6 @@
     </div>
 
     <script>
-        // PASTE YOUR FIREBASE CONFIG HERE
         const firebaseConfig = {
             apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
             authDomain: "mura-billiards-ph.firebaseapp.com",
@@ -76,18 +79,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 1. LOGIN SYSTEM
         function checkLogin() {
             const pass = document.getElementById('adminPass').value;
             if(pass === "mura2026") {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
-            } else {
-                alert("Wrong password!");
-            }
+            } else { alert("Wrong password!"); }
         }
 
-        // 2. CREATE DISCOUNT
         async function createDiscount() {
             const code = document.getElementById('promoCode').value.toUpperCase();
             const amt = document.getElementById('promoAmount').value;
@@ -98,7 +97,6 @@
             document.getElementById('promoAmount').value = "";
         }
 
-        // 3. LOAD DISCOUNTS
         db.collection("discounts").onSnapshot(snap => {
             const list = document.getElementById('promo-list');
             list.innerHTML = "";
@@ -108,29 +106,33 @@
                     <button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End Sale</button>
                 </div>`;
             });
-            if(snap.empty) list.innerHTML = "<small style='color:#444'>No active sales.</small>";
         });
 
-        // 4. POST REVIEW (IMPORTANT: Check collection name "reviews")
         async function postReview() {
             const name = document.getElementById('revName').value;
             const text = document.getElementById('revText').value;
-            if(!name || !text) return alert("Complete review details!");
-            
+            const item = document.getElementById('revItem').value;
+            if(!name || !text || !item) return alert("Fill all fields and select item!");
             await db.collection("reviews").add({ 
-                name: name, 
-                comment: text, 
-                rating: 5, 
-                date: new Date().toLocaleDateString(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Added for better sorting
+                name, comment: text, item_bought: item, rating: 5, date: new Date().toLocaleDateString(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() 
             });
-            
-            alert("Review Posted! Check your website.");
-            document.getElementById('revName').value = "";
-            document.getElementById('revText').value = "";
+            alert("Review Posted!");
+            document.getElementById('revName').value = ""; document.getElementById('revText').value = "";
         }
 
-        // 5. LOAD ORDERS
+        // Live list of reviews for deletion
+        db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
+            const list = document.getElementById('admin-reviews-list');
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                list.innerHTML += `<div class="review-item">
+                    <span style="font-size:11px;"><b>${doc.data().name}</b>: ${doc.data().comment.substring(0,20)}...</span>
+                    <button class="btn-del" onclick="deleteDoc('reviews', '${doc.id}')">Delete</button>
+                </div>`;
+            });
+        });
+
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
             const list = document.getElementById('order-list');
             let revenue = 0;
@@ -147,11 +149,8 @@
             document.getElementById('total-revenue').innerText = "₱" + revenue.toLocaleString();
         });
 
-        // 6. DELETE FUNCTION
         async function deleteDoc(col, id) {
-            if(confirm("Are you sure?")) {
-                await db.collection(col).doc(id).delete();
-            }
+            if(confirm("Confirm Delete?")) { await db.collection(col).doc(id).delete(); }
         }
     </script>
 </body>
