@@ -10,6 +10,11 @@
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #eeeeee; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { background: var(--dark); color: var(--text); padding: 20px; }
+        
+        /* Login Overlay */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; width: 300px; }
+
         h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 25px; text-transform: uppercase; }
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .section { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; }
@@ -17,38 +22,45 @@
         .btn { width: 100%; background: var(--primary); border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-top: 15px; text-transform: uppercase; }
         .btn-del { background: #ff3d00; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
         
-        /* Discount List Style */
         .promo-pill { background: #111; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
     </style>
 </head>
 <body>
 
-    <h2>Mura Billiards PH | Owner Control</h2>
-
-    <div class="admin-grid">
-        <div class="section">
-            <h3>Discount & Sale Manager</h3>
-            <p style="font-size: 11px; color: #666;">Create or End a sale here.</p>
-            <input type="text" id="promoCode" placeholder="Code (e.g. MURA500)">
-            <input type="number" id="promoAmount" placeholder="Discount Amount (₱)">
-            <button class="btn" onclick="createDiscount()">Activate Sale</button>
-            
-            <h4 style="margin-top: 20px; font-size: 12px; color: var(--primary);">Active Promo Codes:</h4>
-            <div id="promo-list">Loading promos...</div>
-        </div>
-
-        <div class="section">
-            <h3>Post Telegram Feedback</h3>
-            <input type="text" id="revName" placeholder="Customer Name">
-            <textarea id="revText" placeholder="Paste review..."></textarea>
-            <button class="btn" onclick="postReview()">Post Review</button>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h3 style="color:var(--primary); margin-bottom: 15px;">Admin Login</h3>
+            <input type="password" id="adminPass" placeholder="Enter Password">
+            <button class="btn" onclick="checkLogin()">Login</button>
         </div>
     </div>
 
-    <div class="section">
-        <h3>Customer Orders (Total Revenue: <span id="total-revenue">₱0</span>)</h3>
-        <div id="order-list">Loading orders...</div>
+    <div id="main-content" style="display:none;">
+        <h2>Mura Billiards PH | Owner Control</h2>
+
+        <div class="admin-grid">
+            <div class="section">
+                <h3>Discount & Sale Manager</h3>
+                <input type="text" id="promoCode" placeholder="Code (e.g. MURA500)">
+                <input type="number" id="promoAmount" placeholder="Discount Amount (₱)">
+                <button class="btn" onclick="createDiscount()">Activate Sale</button>
+                <h4 style="margin-top: 20px; font-size: 12px; color: var(--primary);">Active Promo Codes:</h4>
+                <div id="promo-list">Loading promos...</div>
+            </div>
+
+            <div class="section">
+                <h3>Post Telegram Feedback</h3>
+                <input type="text" id="revName" placeholder="Customer Name">
+                <textarea id="revText" placeholder="Paste review..."></textarea>
+                <button class="btn" onclick="postReview()">Post Review</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Customer Orders (Total Revenue: <span id="total-revenue">₱0</span>)</h3>
+            <div id="order-list">Loading orders...</div>
+        </div>
     </div>
 
     <script>
@@ -64,7 +76,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // CREATE DISCOUNT
+        // 1. LOGIN SYSTEM
+        function checkLogin() {
+            const pass = document.getElementById('adminPass').value;
+            if(pass === "mura2026") {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                alert("Wrong password!");
+            }
+        }
+
+        // 2. CREATE DISCOUNT
         async function createDiscount() {
             const code = document.getElementById('promoCode').value.toUpperCase();
             const amt = document.getElementById('promoAmount').value;
@@ -75,33 +98,39 @@
             document.getElementById('promoAmount').value = "";
         }
 
-        // LOAD DISCOUNTS & DELETE
+        // 3. LOAD DISCOUNTS
         db.collection("discounts").onSnapshot(snap => {
             const list = document.getElementById('promo-list');
             list.innerHTML = "";
             snap.forEach(doc => {
-                list.innerHTML += `
-                    <div class="promo-pill">
-                        <span><b>${doc.id}</b> (-₱${doc.data().amount})</span>
-                        <button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End Sale</button>
-                    </div>
-                `;
+                list.innerHTML += `<div class="promo-pill">
+                    <span><b>${doc.id}</b> (-₱${doc.data().amount})</span>
+                    <button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End Sale</button>
+                </div>`;
             });
             if(snap.empty) list.innerHTML = "<small style='color:#444'>No active sales.</small>";
         });
 
-        // POST REVIEW
+        // 4. POST REVIEW (IMPORTANT: Check collection name "reviews")
         async function postReview() {
             const name = document.getElementById('revName').value;
             const text = document.getElementById('revText').value;
             if(!name || !text) return alert("Complete review details!");
-            await db.collection("reviews").add({ name, comment: text, rating: 5, date: new Date().toLocaleDateString() });
-            alert("Review Posted!");
+            
+            await db.collection("reviews").add({ 
+                name: name, 
+                comment: text, 
+                rating: 5, 
+                date: new Date().toLocaleDateString(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp() // Added for better sorting
+            });
+            
+            alert("Review Posted! Check your website.");
             document.getElementById('revName').value = "";
             document.getElementById('revText').value = "";
         }
 
-        // LOAD ORDERS & DELETE
+        // 5. LOAD ORDERS
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
             const list = document.getElementById('order-list');
             let revenue = 0;
@@ -110,22 +139,18 @@
                 const o = doc.data();
                 const dp = parseFloat(o.dp_amount.replace(/[^\d.-]/g, '')) || 0;
                 revenue += dp;
-                list.innerHTML += `
-                    <div class="order-card">
-                        <button class="btn-del" onclick="deleteDoc('orders', '${doc.id}')">Delete Order</button>
-                        <p><b>${o.customer_name}</b> | ${o.mobile}<br>
-                        ${o.items} - <span style="color:var(--primary)">${o.dp_amount}</span></p>
-                    </div>
-                `;
+                list.innerHTML += `<div class="order-card">
+                    <button class="btn-del" onclick="deleteDoc('orders', '${doc.id}')">Delete Order</button>
+                    <p><b>${o.customer_name}</b> | ${o.mobile}<br>${o.items} - <span style="color:var(--primary)">${o.dp_amount}</span></p>
+                </div>`;
             });
             document.getElementById('total-revenue').innerText = "₱" + revenue.toLocaleString();
         });
 
-        // UNIVERSAL DELETE FUNCTION
+        // 6. DELETE FUNCTION
         async function deleteDoc(col, id) {
-            if(confirm("Are you sure? This cannot be undone.")) {
+            if(confirm("Are you sure?")) {
                 await db.collection(col).doc(id).delete();
-                alert("Data deleted successfully.");
             }
         }
     </script>
