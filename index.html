@@ -26,10 +26,10 @@
         .reviews-sec { margin-top: 80px; padding: 40px 0; border-top: 1px solid #222; }
         .review-card { background: #111; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--primary); }
         .stars { color: #ffcc00; margin-bottom: 5px; }
+        .item-badge { display: inline-block; font-size: 10px; color: var(--primary); background: rgba(0,200,83,0.1); padding: 2px 8px; border: 1px solid var(--primary); border-radius: 4px; margin-top: 8px; text-transform: uppercase; }
         #cart-sidebar { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 25px; border-left: 2px solid var(--primary); box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
         input, textarea, select { width: 100%; padding: 14px; margin-top: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; font-size: 14px; }
-        input:focus { border-color: var(--primary); outline: none; }
         .summary-box { background: rgba(0,200,83,0.05); border: 1px dashed var(--primary); padding: 15px; margin-top: 20px; border-radius: 10px; }
         #cart-trigger { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: black; padding: 18px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,200,83,0.2); z-index: 1000; }
     </style>
@@ -45,39 +45,19 @@
     <div class="grid">
         <div class="product-card">
             <img src="images/mini-table.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Mini Table (120x75cm)</h3>
-                <p class="price">₱1,500</p>
-                <p class="ship-info">+ ₱185 Shipping Fee</p>
-                <button class="btn-add" onclick="addToCart('Mini Table (120x75cm)', 1500, 185)">Add to Cart</button>
-            </div>
+            <div class="p-info"><h3>Mini Table (120x75cm)</h3><p class="price">₱1,500</p><p class="ship-info">+ ₱185 Shipping</p><button class="btn-add" onclick="addToCart('Mini Table (120x75cm)', 1500, 185)">Add to Cart</button></div>
         </div>
         <div class="product-card">
             <img src="images/jr-blue.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Jr. Size 4x7 (Blue)</h3>
-                <p class="price">₱5,000</p>
-                <p class="ship-info">+ ₱285 Shipping Fee</p>
-                <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button>
-            </div>
+            <div class="p-info"><h3>Jr. Size 4x7 (Blue)</h3><p class="price">₱5,000</p><p class="ship-info">+ ₱285 Shipping</p><button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button></div>
         </div>
         <div class="product-card">
             <img src="images/jr-green.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Jr. Size 4x7 (Green)</h3>
-                <p class="price">₱5,000</p>
-                <p class="ship-info">+ ₱285 Shipping Fee</p>
-                <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button>
-            </div>
+            <div class="p-info"><h3>Jr. Size 4x7 (Green)</h3><p class="price">₱5,000</p><p class="ship-info">+ ₱285 Shipping</p><button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button></div>
         </div>
         <div class="product-card">
             <img src="images/jr-black.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Jr. Size 4x7 (Black Edition)</h3>
-                <p class="price">₱6,500</p>
-                <p class="ship-info">+ ₱285 Shipping Fee</p>
-                <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button>
-            </div>
+            <div class="p-info"><h3>Jr. Size 4x7 (Black Edition)</h3><p class="price">₱6,500</p><p class="ship-info">+ ₱285 Shipping</p><button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button></div>
         </div>
     </div>
 
@@ -92,7 +72,6 @@
 <div id="cart-sidebar">
     <h2 style="font-family: Oswald; border-bottom: 1px solid #333; padding-bottom: 10px;">ORDER CHECKOUT</h2>
     <div id="cart-items-list" style="margin-top: 20px;"></div>
-
     <select id="area" onchange="updateArrival()">
         <option value="">Select Delivery Area</option>
         <option value="Manila">Metro Manila (2-3 Days)</option>
@@ -100,31 +79,22 @@
         <option value="Mindanao">Mindanao (5-7 Days)</option>
     </select>
     <p id="arrival-msg" style="font-size: 12px; color: var(--primary); margin-top: 5px;"></p>
-
-    <input type="text" id="promoCode" placeholder="Have a Promo Code?" onchange="applyPromo()">
-    
+    <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
     <div class="summary-box">
-        <p style="font-size: 13px;">Subtotal: <span id="sub-val">₱0</span></p>
-        <p style="font-size: 13px;">Shipping: <span id="ship-val">₱0</span></p>
-        <p style="font-size: 13px; color: #ff3d00;">Discount: -<span id="disc-val">₱0</span></p>
+        <p>Subtotal: <span id="sub-val">₱0</span></p>
+        <p>Shipping: <span id="ship-val">₱0</span></p>
+        <p style="color: #ff3d00;">Discount: -<span id="disc-val">₱0</span></p>
         <h3 style="margin-top: 10px; color: var(--primary);">40% DP: <span id="dp-val">₱0</span></h3>
     </div>
-
     <input type="text" id="cName" placeholder="Full Name">
     <input type="text" id="cMobile" placeholder="Mobile Number">
-    <textarea id="cAddr" placeholder="Complete Shipping Address" rows="3"></textarea>
-    <input type="text" id="refNo" placeholder="GCash/Maya Ref Number">
-    
-    <label style="font-size: 11px; display: block; margin-top: 15px;">
-        <input type="checkbox" id="terms"> I agree to the non-refundable 40% DP policy.
-    </label>
-
+    <textarea id="cAddr" placeholder="Complete Address" rows="2"></textarea>
+    <input type="text" id="refNo" placeholder="Payment Ref Number">
     <button class="btn-add" style="margin-top: 20px;" onclick="finalizeOrder()">SUBMIT ORDER</button>
-    <button onclick="toggleCart(false)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Continue Shopping</button>
+    <button onclick="toggleCart(false)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Back</button>
 </div>
 
 <script>
-    // FIREBASE CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
         authDomain: "mura-billiards-ph.firebaseapp.com",
@@ -136,64 +106,45 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let cart = [];
-    let discountAmount = 0;
-
-    // 1. REVIEWS LISTENER
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
-        const revDisplay = document.querySelector('.reviews-sec');
-        revDisplay.innerHTML = '<h2 style="font-family: Oswald; margin-bottom: 20px;">CUSTOMER REVIEWS</h2>';
+        const revContainer = document.getElementById('reviews-placeholder');
+        revContainer.innerHTML = "";
         snap.forEach(doc => {
             const r = doc.data();
-            revDisplay.innerHTML += `
+            const badge = r.item_bought ? `<div class="item-badge">Purchased: ${r.item_bought}</div>` : "";
+            revContainer.innerHTML += `
                 <div class="review-card">
                     <div class="stars">★★★★★</div>
                     <p>"${r.comment}"</p>
-                    <small style="color: #666;">— ${r.name} (Verified Buyer)</small>
+                    <small style="color: #666; font-weight: bold;">— ${r.name} (Verified Buyer)</small>
+                    ${badge}
                 </div>`;
         });
+        if(snap.empty) revContainer.innerHTML = "<p>No reviews yet.</p>";
     });
 
-    // 2. CART FUNCTIONS
-    function addToCart(name, price, ship) {
-        cart.push({ id: Date.now(), name, price, ship });
-        updateCartUI();
-        toggleCart(true);
-    }
+    let cart = [];
+    let discountAmount = 0;
 
-    function toggleCart(show) {
-        document.getElementById('cart-sidebar').style.right = show ? "0" : "-400px";
-    }
+    function addToCart(name, price, ship) { cart.push({ name, price, ship }); updateCartUI(); toggleCart(true); }
+    function toggleCart(show) { document.getElementById('cart-sidebar').style.right = show ? "0" : "-400px"; }
 
     function updateCartUI() {
         const list = document.getElementById('cart-items-list');
-        list.innerHTML = "";
-        let sub = 0, ship = 0;
-        cart.forEach(i => {
-            sub += i.price;
-            ship += i.ship;
-            list.innerHTML += `<div class="cart-item"><span>${i.name}</span><span>₱${i.price.toLocaleString()}</span></div>`;
-        });
+        let sub = 0, ship = 0; list.innerHTML = "";
+        cart.forEach(i => { sub += i.price; ship += i.ship; list.innerHTML += `<div class="cart-item"><span>${i.name}</span><span>₱${i.price.toLocaleString()}</span></div>`; });
         document.getElementById('cart-count').innerText = cart.length;
         document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
         document.getElementById('ship-val').innerText = "₱" + ship.toLocaleString();
         document.getElementById('disc-val').innerText = "₱" + discountAmount.toLocaleString();
-        const total = (sub + ship) - discountAmount;
-        document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
+        document.getElementById('dp-val').innerText = "₱" + (((sub + ship) - discountAmount) * 0.4).toLocaleString();
     }
 
-    // 3. PROMO SYSTEM
     async function applyPromo() {
         const code = document.getElementById('promoCode').value.toUpperCase();
-        if(!code) { discountAmount = 0; updateCartUI(); return; }
         const doc = await db.collection("discounts").doc(code).get();
-        if (doc.exists) {
-            discountAmount = doc.data().amount;
-            alert("Promo Applied!");
-        } else {
-            discountAmount = 0;
-            alert("Invalid Code");
-        }
+        discountAmount = doc.exists ? doc.data().amount : 0;
+        if(code && !doc.exists) alert("Invalid Code");
         updateCartUI();
     }
 
@@ -202,27 +153,12 @@
         document.getElementById('arrival-msg').innerText = a ? (a === "Manila" ? "Delivery: 2-3 Days" : "Delivery: 5-7 Days") : "";
     }
 
-    // 4. FINALIZE ORDER
     async function finalizeOrder() {
         const name = document.getElementById('cName').value;
-        const mobile = document.getElementById('cMobile').value;
-        const ref = document.getElementById('refNo').value;
-        const terms = document.getElementById('terms').checked;
-
-        if(!name || !mobile || cart.length === 0 || !terms || !ref) return alert("Complete all details!");
-
-        const orderData = {
-            customer_name: name,
-            mobile: mobile,
-            items: cart.map(i => i.name).join(", "),
-            dp_amount: document.getElementById('dp-val').innerText,
-            ref_no: ref,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
+        if(!name || cart.length === 0) return alert("Fill details!");
+        const orderData = { customer_name: name, mobile: document.getElementById('cMobile').value, items: cart.map(i => i.name).join(", "), dp_amount: document.getElementById('dp-val').innerText, timestamp: firebase.firestore.FieldValue.serverTimestamp() };
         await db.collection("orders").add(orderData);
-        alert("Order Sent!");
-        window.location.href = `https://t.me/murabilliardph?text=Order From ${name}`;
+        alert("Order Sent!"); window.location.href = `https://t.me/murabilliardph?text=Order From ${name}`;
     }
 </script>
 </body>
