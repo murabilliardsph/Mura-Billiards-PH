@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Mura Billiards PH</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
 
+    <style>
+        :root { --primary: #00c853; --dark: #0a0a0a; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        
+        /* LOGIN SCREEN STYLE */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; justify-content: center; align-items: center; z-index: 9999;
+        }
+        .login-box {
+            background: #111; padding: 30px; border-radius: 12px; border: 1px solid var(--primary);
+            text-align: center; width: 90%; max-width: 350px;
+        }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 15px 0; background: #222; border: 1px solid #444;
+            color: white; border-radius: 6px; text-align: center; font-size: 16px;
+        }
+        .login-box button {
+            width: 100%; background: var(--primary); color: black; border: none;
+            padding: 12px; font-weight: bold; border-radius: 6px; cursor: pointer;
+        }
+
+        /* DASHBOARD STYLE (Hidden by default) */
+        #main-dashboard { display: none; }
+        h2 { border-bottom: 2px solid var(--primary); padding-bottom: 10px; color: var(--primary); }
+        .order-card { 
+            background: #151515; border: 1px solid #333; padding: 15px; 
+            border-radius: 8px; margin-bottom: 15px; display: grid; 
+            grid-template-columns: 1fr 1fr; gap: 10px; position: relative; 
+        }
+        .label { color: #666; font-size: 10px; text-transform: uppercase; }
+        .val { font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .status-badge { 
+            position: absolute; top: 15px; right: 15px; 
+            background: var(--primary); color: black; padding: 3px 10px; 
+            border-radius: 4px; font-size: 11px; font-weight: bold; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="margin-bottom:10px;">ADMIN ACCESS</h2>
+            <p style="font-size:12px; color:#888;">Enter password to view orders</p>
+            <input type="password" id="passInput" placeholder="Password">
+            <button onclick="checkPass()">LOGIN</button>
+        </div>
+    </div>
+
+    <div id="main-dashboard">
+        <h2>MURA BILLIARDS PH | ORDERS</h2>
+        <p style="font-size: 12px; margin-bottom: 20px;">Real-time Customer Data</p>
+        <div id="order-list">
+            <p style="color:#666;">Loading orders...</p>
+        </div>
+    </div>
+
+    <script>
+       // PASTE YOUR FIREBASE CONFIG HERE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
+            authDomain: "mura-billiards-ph.firebaseapp.com",
+            projectId: "mura-billiards-ph",
+            storageBucket: "mura-billiards-ph.firebasestorage.app",
+            messagingSenderId: "959920092233",
+            appId: "1:959920092233:web:d224b24baa4f3284467b98"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- STEP B: PASSWORD LOGIC ---
+        function checkPass() {
+            const input = document.getElementById('passInput').value;
+            const correctPass = "mura2026"; // <--- PALITAN MO ITO NG GUSTO MONG PASSWORD
+
+            if (input === correctPass) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-dashboard').style.display = 'block';
+                loadOrders(); // Tawagin ang Firebase data
+            } else {
+                alert("Wrong password!");
+            }
+        }
+
+        // --- STEP C: FETCH DATA FROM FIREBASE ---
+        function loadOrders() {
+            db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
+                const list = document.getElementById('order-list');
+                list.innerHTML = ""; // Clear muna ang loading text
+                
+                if (snap.empty) {
+                    list.innerHTML = "<p style='color:#666;'>No orders found yet.</p>";
+                    return;
+                }
+
+                snap.forEach(doc => {
+                    const o = doc.data();
+                    list.innerHTML += `
+                        <div class="order-card">
+                            <div class="status-badge">${o.status || 'New'}</div>
+                            <div style="grid-column: span 2;">
+                                <span class="label">Customer Name</span>
+                                <div class="val">${o.customer_name}</div>
+                            </div>
+                            <div>
+                                <span class="label">Mobile</span>
+                                <div class="val">${o.mobile}</div>
+                            </div>
+                            <div>
+                                <span class="label">DP Amount</span>
+                                <div class="val" style="color:#00c853">${o.dp_amount}</div>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <span class="label">Address & Area</span>
+                                <div class="val">${o.address} (${o.area})</div>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <span class="label">Items</span>
+                                <div class="val" style="color:var(--primary)">${o.items}</div>
+                            </div>
+                            <div style="grid-column: span 2;">
+                                <span class="label">Reference Number</span>
+                                <div class="val" style="font-family:monospace; background:#222; padding:5px; border-radius:4px;">${o.ref_no}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
