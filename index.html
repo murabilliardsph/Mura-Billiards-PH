@@ -26,7 +26,6 @@
         .btn-add { width: 100%; background: var(--primary); color: black; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 15px; text-transform: uppercase; }
         .reviews-sec { margin-top: 80px; padding: 40px 0; border-top: 1px solid #222; }
         .review-card { background: #111; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--primary); }
-        .stars { color: #ffcc00; margin-bottom: 5px; }
         #cart-sidebar { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 25px; border-left: 2px solid var(--primary); box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; }
         input, textarea, select { width: 100%; padding: 14px; margin-top: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; font-size: 14px; }
@@ -34,7 +33,12 @@
         #cart-trigger { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: black; padding: 18px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,200,83,0.2); z-index: 1000; }
         .remove-btn { color: #ff3d00; cursor: pointer; font-size: 11px; margin-left: 10px; font-weight: bold; }
         .qr-section { margin-top: 20px; text-align: center; background: #111; padding: 15px; border-radius: 10px; border: 1px solid #333; }
-        .qr-image { width: 100%; max-width: 200px; border-radius: 8px; margin-top: 10px; }
+        .qr-image { width: 100%; max-width: 180px; border-radius: 8px; margin-top: 10px; }
+        .checkout-step { display: none; }
+        .checkout-step.active { display: block; }
+        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 12px; color: #555; }
+        .step-indicator .active { color: var(--primary); font-weight: bold; }
+        .confirm-data { font-size: 13px; color: #ccc; background: #111; padding: 10px; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -112,44 +116,58 @@
 <div id="cart-trigger" onclick="toggleCart(true)">🛒 VIEW CART (<span id="cart-count">0</span>)</div>
 
 <div id="cart-sidebar">
-    <h2 style="font-family: Oswald; border-bottom: 1px solid #333; padding-bottom: 10px;">ORDER CHECKOUT</h2>
-    <div id="cart-items-list" style="margin-top: 20px;"></div>
-    
-    <select id="area" onchange="updateArrival()">
-        <option value="">Select Delivery Area</option>
-        <option value="Manila">Metro Manila (2-3 Days)</option>
-        <option value="Visayas">Visayas (5-7 Days)</option>
-        <option value="Mindanao">Mindanao (5-7 Days)</option>
-    </select>
-    <p id="arrival-msg" style="font-size: 12px; color: var(--primary); margin-top: 5px;"></p>
-    
-    <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
-    
-    <div class="summary-box">
-        <p>Subtotal: <span id="sub-val">₱0</span></p>
-        <p>Shipping: <span id="ship-val">₱0</span></p>
-        <p style="color: #ff3d00;">Discount: -<span id="disc-val">₱0</span></p>
-        <h3 style="margin-top: 10px; color: var(--primary);">40% DP: <span id="dp-val">₱0</span></h3>
+    <div class="step-indicator">
+        <span id="step1-label" class="active">1. DETAILS</span>
+        <span id="step2-label">2. PAYMENT</span>
     </div>
 
-    <input type="text" id="cName" placeholder="Full Name">
-    <input type="text" id="cMobile" placeholder="Mobile Number">
-    <textarea id="cAddr" placeholder="Complete Shipping Address" rows="2"></textarea>
+    <div id="step1" class="checkout-step active">
+        <h2 style="font-family: Oswald; border-bottom: 1px solid #333; padding-bottom: 10px;">ORDER DETAILS</h2>
+        <div id="cart-items-list" style="margin-top: 15px;"></div>
+        
+        <select id="area" onchange="updateArrival()">
+            <option value="">Select Delivery Area</option>
+            <option value="Manila">Metro Manila (2-3 Days)</option>
+            <option value="Visayas">Visayas (5-7 Days)</option>
+            <option value="Mindanao">Mindanao (5-7 Days)</option>
+        </select>
+        <p id="arrival-msg" style="font-size: 11px; color: var(--primary); margin-top: 5px;"></p>
+        
+        <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
+        <input type="text" id="cName" placeholder="Full Name">
+        <input type="text" id="cMobile" placeholder="Mobile Number">
+        <textarea id="cAddr" placeholder="Complete Shipping Address" rows="2"></textarea>
 
-    <div class="qr-section">
-        <p style="font-size: 12px; font-weight: bold; color: var(--primary);">SCAN TO PAY DOWNPAYMENT</p>
-        <img src="images/qr-code.jpg" class="qr-image" alt="GCash/Maya QR">
-        <p style="font-size: 10px; color: #888; margin-top: 5px;">Mura Billiards PH Official Payment</p>
+        <div class="summary-box">
+            <p>Subtotal: <span id="sub-val">₱0</span></p>
+            <p>Shipping: <span id="ship-val">₱0</span></p>
+            <p style="color: #ff3d00;">Discount: -<span id="disc-val">₱0</span></p>
+        </div>
+        
+        <button class="btn-add" style="margin-top: 20px;" onclick="goToStep(2)">NEXT: PAYMENT</button>
+        <button onclick="toggleCart(false)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Cancel</button>
     </div>
 
-    <input type="text" id="refNo" placeholder="Gcash/Maya Ref Number">
-    
-    <label style="font-size: 11px; display: block; margin-top: 15px; color: #888;">
-        <input type="checkbox" id="terms-check"> I agree to the 40% non-refundable DP policy.
-    </label>
+    <div id="step2" class="checkout-step">
+        <h2 style="font-family: Oswald; border-bottom: 1px solid #333; padding-bottom: 10px;">CONFIRM & PAY</h2>
+        
+        <div class="confirm-data" id="confirm-summary"></div>
 
-    <button class="btn-add" style="margin-top: 20px;" onclick="finalizeOrder()">SUBMIT ORDER</button>
-    <button onclick="toggleCart(false)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Back to Shop</button>
+        <div class="qr-section">
+            <p style="font-size: 11px; font-weight: bold; color: var(--primary);">SCAN TO PAY 40% DOWNPAYMENT</p>
+            <img src="images/qr-code.jpg" class="qr-image">
+            <h3 style="margin-top: 10px; color: var(--primary);">REQUIRED DP: <span id="dp-val">₱0</span></h3>
+        </div>
+
+        <input type="text" id="refNo" placeholder="Gcash/Maya Ref Number">
+        
+        <label style="font-size: 11px; display: block; margin-top: 15px; color: #888;">
+            <input type="checkbox" id="terms-check"> I confirm that all details are correct.
+        </label>
+
+        <button class="btn-add" style="margin-top: 20px;" onclick="finalizeOrder()">FINALIZE ORDER</button>
+        <button onclick="goToStep(1)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Go Back</button>
+    </div>
 </div>
 
 <script>
@@ -164,20 +182,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Loading Reviews
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
         const revContainer = document.getElementById('reviews-placeholder');
         revContainer.innerHTML = "";
         snap.forEach(doc => {
             const r = doc.data();
-            revContainer.innerHTML += `
-                <div class="review-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"${r.comment}"</p>
-                    <small style="color: #666; font-weight: bold;">— ${r.name} (Verified Buyer)</small>
-                </div>`;
+            revContainer.innerHTML += `<div class="review-card"><div class="stars">★★★★★</div><p>"${r.comment}"</p><small style="color: #666; font-weight: bold;">— ${r.name} (Verified Buyer)</small></div>`;
         });
-        if(snap.empty) revContainer.innerHTML = "<p>No reviews yet.</p>";
     });
 
     let cart = [];
@@ -196,29 +207,44 @@
 
     function toggleCart(show) { 
         document.getElementById('cart-sidebar').style.right = show ? "0" : "-400px"; 
+        if(!show) goToStep(1);
+    }
+
+    function goToStep(step) {
+        document.querySelectorAll('.checkout-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        document.getElementById('step1-label').classList.toggle('active', step === 1);
+        document.getElementById('step2-label').classList.toggle('active', step === 2);
+
+        if(step === 2) {
+            const name = document.getElementById('cName').value;
+            const mobile = document.getElementById('cMobile').value;
+            if(!name || cart.length === 0) {
+                alert("Please add items and fill your name.");
+                goToStep(1);
+                return;
+            }
+            document.getElementById('confirm-summary').innerHTML = `
+                <b>Customer:</b> ${name}<br>
+                <b>Mobile:</b> ${mobile}<br>
+                <b>Items:</b> ${cart.length} pc(s)
+            `;
+        }
     }
 
     function updateCartUI() {
         const list = document.getElementById('cart-items-list');
-        let sub = 0, ship = 0; 
-        list.innerHTML = "";
-        
+        let sub = 0, ship = 0; list.innerHTML = "";
         cart.forEach(i => { 
-            sub += i.price; 
-            ship += i.ship; 
-            list.innerHTML += `
-                <div class="cart-item">
-                    <span>${i.name}</span>
-                    <span>₱${i.price.toLocaleString()} <span class="remove-btn" onclick="removeFromCart(${i.id})">✖</span></span>
-                </div>`; 
+            sub += i.price; ship += i.ship; 
+            list.innerHTML += `<div class="cart-item"><span>${i.name}</span><span>₱${i.price.toLocaleString()} <span class="remove-btn" onclick="removeFromCart(${i.id})">✖</span></span></div>`; 
         });
-
-        const totalToPay = (sub + ship) - discountAmount;
+        const total = (sub + ship) - discountAmount;
         document.getElementById('cart-count').innerText = cart.length;
         document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
         document.getElementById('ship-val').innerText = "₱" + ship.toLocaleString();
         document.getElementById('disc-val').innerText = "₱" + discountAmount.toLocaleString();
-        document.getElementById('dp-val').innerText = "₱" + (totalToPay * 0.4).toLocaleString();
+        document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
     }
 
     async function applyPromo() {
@@ -232,36 +258,29 @@
 
     function updateArrival() {
         const a = document.getElementById('area').value;
-        document.getElementById('arrival-msg').innerText = a ? (a === "Manila" ? "Estimated Arrival: 2-3 Days" : "Estimated Arrival: 5-7 Days") : "";
+        document.getElementById('arrival-msg').innerText = a ? (a === "Manila" ? "ETA: 2-3 Days" : "ETA: 5-7 Days") : "";
     }
 
     async function finalizeOrder() {
-        const name = document.getElementById('cName').value;
-        const mobile = document.getElementById('cMobile').value;
-        const address = document.getElementById('cAddr').value;
         const ref = document.getElementById('refNo').value;
-        const check = document.getElementById('terms-check').checked;
-
-        if(!name || !mobile || !address || !ref || cart.length === 0 || !check) {
-            return alert("Please fill all details and accept the 40% DP policy.");
-        }
+        if(!ref || !document.getElementById('terms-check').checked) return alert("Complete the payment details!");
 
         const orderData = { 
-            customer_name: name, 
-            mobile: mobile,
-            address: address,
+            customer_name: document.getElementById('cName').value, 
+            mobile: document.getElementById('cMobile').value,
+            address: document.getElementById('cAddr').value,
             items: cart.map(i => i.name).join(", "), 
-            area: document.getElementById('area').value,
             dp_amount: document.getElementById('dp-val').innerText,
             ref_no: ref,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            status: "Pending"
+            status: "Pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         await db.collection("orders").add(orderData);
-        alert("Order Submitted! Redirecting to Telegram for confirmation."); 
-        window.location.href = `https://t.me/murabilliardph?text=Hello! I just placed an order for ${orderData.items}. My name is ${name}.`;
+        alert("Order Received! Sending confirmation to Telegram..."); 
+        window.location.href = `https://t.me/murabilliardph?text=Order Confirmation:%0AItems: ${orderData.items}%0AAmount: ${orderData.dp_amount}%0ARef: ${ref}`;
     }
 </script>
 </body>
 </html>
+
