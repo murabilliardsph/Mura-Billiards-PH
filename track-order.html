@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track My Order | Mura Billiards PH</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #ffffff; }
+        body { background: var(--dark); color: var(--text); font-family: 'Roboto', sans-serif; display: flex; justify-content: center; padding: 20px; min-height: 100vh; align-items: center; }
+        .track-container { max-width: 450px; width: 100%; background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #222; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { font-family: 'Oswald', sans-serif; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; }
+        input { width: 100%; padding: 15px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 1.1rem; outline: none; }
+        input:focus { border-color: var(--primary); }
+        .btn-track { width: 100%; background: var(--primary); color: black; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-track:hover { background: #00e676; }
+        #result-box { display: none; margin-top: 30px; text-align: left; padding: 20px; background: #111; border: 1px solid #ffcc00; border-radius: 12px; }
+        .status-label { font-size: 11px; color: #ffcc00; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .status-badge { color: var(--primary); font-size: 1.6rem; font-weight: bold; display: block; margin: 5px 0; }
+        .info-text { font-size: 13px; color: #ccc; margin-top: 8px; line-height: 1.4; }
+        .update-tag { font-size: 11px; color: #666; margin-top: 15px; border-top: 1px solid #222; padding-top: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="track-container">
+    <h1>TRACK ORDER 📦</h1>
+    <p style="font-size: 14px; color: #888; margin-bottom: 25px;">Enter your Mobile Number to check status</p>
+    <input type="text" id="mobileInput" placeholder="e.g. 09123456789">
+    <button class="btn-track" onclick="trackNow()">Search Now</button>
+
+    <div id="result-box">
+        <span class="status-label">Current Status</span>
+        <span id="statusLabel" class="status-badge">---</span>
+        
+        <div id="statusDetails" class="info-text"></div>
+        
+        <span class="update-tag">Last Status Update: <span id="lastUpdate">---</span></span>
+    </div>
+    
+    <p style="margin-top: 25px; font-size: 12px; color: #444;">&copy; Mura Billiards PH</p>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
+        authDomain: "mura-billiards-ph.firebaseapp.com",
+        projectId: "mura-billiards-ph",
+        storageBucket: "mura-billiards-ph.firebasestorage.app",
+        messagingSenderId: "959920092233",
+        appId: "1:959920092233:web:d224b24baa4f3284467b98"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function trackNow() {
+        const mobile = document.getElementById('mobileInput').value.trim();
+        if(!mobile) return alert("Please enter your mobile number.");
+
+        const q = await db.collection("orders").where("customer_mobile", "==", mobile).orderBy("timestamp", "desc").limit(1).get();
+
+        if(q.empty) {
+            alert("No order found. Please check your number.");
+            document.getElementById('result-box').style.display = "none";
+        } else {
+            const data = q.docs[0].get('status') ? q.docs[0].data() : { ...q.docs[0].data(), status: "Order Received" };
+            const resBox = document.getElementById('result-box');
+            const det = document.getElementById('statusDetails');
+            
+            resBox.style.display = "block";
+            document.getElementById('statusLabel').innerText = data.status;
+            document.getElementById('lastUpdate').innerText = data.status_update || "Just Now";
+
+            // Special Message for Handcrafting
+            if(data.status === "In Production / Crafting") {
+                det.innerHTML = "🛠️ <b>Quality Check:</b> Your table is now being handcrafted with precision. We ensure everything is perfect before we ship it out.";
+            } else {
+                const reg = data.customer_region || "Luzon";
+                const eta = (reg === "Luzon") ? "1-2 Business Days" : "4-5 Business Days";
+                det.innerHTML = "🚚 <b>Delivery Info:</b> Estimated arrival in " + eta + " once shipped to " + reg + ".";
+            }
+        }
+    }
+</script>
+</body>
+</html>
+
