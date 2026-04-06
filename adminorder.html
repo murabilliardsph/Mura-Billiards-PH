@@ -7,26 +7,29 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
-        :root { --primary: #00c853; }
-        body { background: #050505; color: white; font-family: sans-serif; padding: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; }
-        .order-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid #333; margin-bottom: 15px; position: relative; }
-        .order-card.new { border-left-color: var(--primary); }
-        .cust-name { font-size: 1.2rem; color: var(--primary); font-weight: bold; }
-        .cust-info { font-size: 14px; color: #aaa; margin: 5px 0; }
-        .status-now { background: #222; padding: 5px 10px; border-radius: 5px; font-size: 12px; color: #ffcc00; }
-        select { width: 100%; padding: 12px; margin-top: 15px; background: #222; color: white; border: 1px solid #444; border-radius: 8px; }
-        button { width: 100%; padding: 12px; margin-top: 10px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        :root { --primary: #00c853; --bg: #050505; }
+        body { background: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 20px; }
+        .order-card { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #222; margin-bottom: 15px; border-left: 6px solid #333; transition: 0.3s; }
+        .order-card.active { border-left-color: var(--primary); }
+        .cust-name { font-size: 1.3rem; color: var(--primary); font-weight: bold; text-transform: capitalize; }
+        .cust-info { font-size: 13px; color: #999; margin: 4px 0; }
+        .badge { display: inline-block; background: #222; padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #ffcc00; margin-top: 10px; font-weight: bold; border: 1px solid #333; }
+        select { width: 100%; padding: 14px; margin-top: 15px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 10px; font-size: 14px; outline: none; }
+        select:focus { border-color: var(--primary); }
+        .btn-upd { width: 100%; padding: 14px; margin-top: 10px; background: var(--primary); color: black; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-upd:active { transform: scale(0.98); }
+        #loading { text-align: center; color: #666; margin-top: 50px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>ORDER MANAGER</h2>
-        <button onclick="location.reload()" style="width:auto; padding: 5px 15px;">Refresh</button>
+        <h2 style="font-size: 1.2rem; letter-spacing: 1px;">ORDER MANAGER</h2>
+        <button onclick="location.reload()" style="background:none; border: 1px solid #444; color: #888; padding: 5px 12px; border-radius: 5px; cursor: pointer;">Refresh</button>
     </div>
 
-    <div id="admin-list">Loading orders...</div>
+    <div id="admin-list"><div id="loading">Fetching latest orders...</div></div>
 
 <script>
     const firebaseConfig = {
@@ -41,52 +44,66 @@
     const db = firebase.firestore();
 
     async function loadOrders() {
-        const snap = await db.collection("orders").orderBy("timestamp", "desc").get();
         const list = document.getElementById('admin-list');
-        list.innerHTML = "";
+        try {
+            const snap = await db.collection("orders").orderBy("timestamp", "desc").get();
+            list.innerHTML = "";
 
-        if(snap.empty) { list.innerHTML = "No orders found."; return; }
+            if(snap.empty) { list.innerHTML = "<p style='text-align:center; color:#555;'>No orders found in database.</p>"; return; }
 
-        snap.forEach(doc => {
-            const ord = doc.data();
-            const id = doc.id;
-            list.innerHTML += `
-                <div class="order-card ${!ord.status ? 'new' : ''}">
-                    <div class="cust-name">${ord.customer_name}</div>
-                    <div class="cust-info">📞 ${ord.customer_mobile} | 📍 ${ord.customer_region || 'N/A'}</div>
-                    <div class="cust-info">📦 <b>Items:</b> ${ord.order_items}</div>
-                    <div class="cust-info">💳 <b>DP Paid:</b> ${ord.order_dp} | <b>Ref:</b> ${ord.gcash_ref}</div>
-                    <p>Current: <span class="status-now">${ord.status || 'Order Received'}</span></p>
-                    
-                    <select id="sel-${id}">
-                        <option value="">-- Update Status --</option>
-                        <option value="In Production / Crafting">🛠️ In Production / Crafting</option>
-                        <option value="Packing Order">📦 Packing Order</option>
-                        <option value="Ongoing / Shipping">🚚 Ongoing / Shipping</option>
-                        <option value="Arrived / Delivered">✅ Arrived / Delivered</option>
-                        <option value="Cancelled">❌ Cancelled</option>
-                    </select>
-                    <button onclick="updateStatus('${id}')">Update Order Status</button>
-                </div>
-            `;
-        });
+            snap.forEach(doc => {
+                const ord = doc.data();
+                const id = doc.id;
+                list.innerHTML += `
+                    <div class="order-card ${!ord.status || ord.status === 'Order Received' ? 'active' : ''}">
+                        <div class="cust-name">${ord.customer_name}</div>
+                        <div class="cust-info">📞 ${ord.customer_mobile} | 📍 ${ord.customer_region || 'No Region'}</div>
+                        <div class="cust-info">🏠 ${ord.customer_address || 'No Address'}</div>
+                        <div class="cust-info">📦 <b>Items:</b> ${ord.order_items}</div>
+                        <div class="cust-info">💳 <b>Total:</b> ${ord.order_total} | <b>Ref:</b> ${ord.gcash_ref}</div>
+                        <div class="badge">${ord.status || 'Order Received'}</div>
+                        
+                        <select id="sel-${id}">
+                            <option value="">-- Change Status --</option>
+                            <option value="In Production / Crafting">🛠️ In Production / Crafting</option>
+                            <option value="Packing Order">📦 Packing Order</option>
+                            <option value="Ongoing / Shipping">🚚 Ongoing / Shipping</option>
+                            <option value="Arrived / Delivered">✅ Arrived / Delivered</option>
+                            <option value="Cancelled">❌ Cancelled</option>
+                        </select>
+                        <button class="btn-upd" onclick="updateStatus('${id}')">Update Order Status</button>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            list.innerHTML = "<p style='color:red;'>Error loading orders. Check Console (F12).</p>";
+            console.error(err);
+        }
     }
 
     async function updateStatus(id) {
         const val = document.getElementById('sel-'+id).value;
-        if(!val) return alert("Select a status first.");
+        if(!val) return alert("Select a status from the dropdown first.");
         
-        await db.collection("orders").doc(id).update({
-            status: val,
-            status_update: new Date().toLocaleString()
-        });
-        alert("Success! Status changed to " + val);
-        loadOrders();
+        const confirmUpd = confirm("Update status to: " + val + "?");
+        if(!confirmUpd) return;
+
+        try {
+            await db.collection("orders").doc(id).update({
+                status: val,
+                status_update: new Date().toLocaleString()
+            });
+            alert("Success! Order updated.");
+            loadOrders();
+        } catch (err) {
+            alert("Failed to update: " + err.message);
+        }
     }
 
+    // Login Gate
     const p = prompt("Admin Password:");
-    if(p === "1234") loadOrders(); else document.body.innerHTML = "Access Denied.";
+    if(p === "1234") loadOrders(); 
+    else { document.body.innerHTML = "<div style='text-align:center; margin-top:100px;'><h3>Access Denied.</h3><button onclick='location.reload()'>Try Again</button></div>"; }
 </script>
 </body>
 </html>
-
