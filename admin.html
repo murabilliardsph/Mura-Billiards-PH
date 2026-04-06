@@ -2,137 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Owner Dashboard | Mura Billiards PH</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #eeeeee; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--dark); color: var(--text); padding: 20px; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--primary); text-align: center; width: 300px; }
-        h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 25px; text-transform: uppercase; }
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        body { background: var(--dark); color: var(--text); padding: 20px; font-family: sans-serif; }
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--dark); z-index:999; display:flex; align-items:center; justify-content:center; }
         .section { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; }
-        input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; }
-        .btn { width: 100%; background: var(--primary); border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-top: 15px; text-transform: uppercase; }
-        .btn-del { background: #ff3d00; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
-        .promo-pill, .review-item { background: #111; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); position: relative; }
-        .order-card p { font-size: 13px; margin-bottom: 4px; color: #ccc; }
-        .order-card b { color: var(--primary); font-size: 14px; }
+        .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .btn-del { background: #ff3d00; color: white; border: none; padding: 5px; cursor: pointer; float: right; }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <h3 style="color:var(--primary); margin-bottom: 15px;">Admin Login</h3>
-            <input type="password" id="adminPass" placeholder="Enter Password">
-            <button class="btn" onclick="checkLogin()">Login</button>
-        </div>
+<div id="login-overlay">
+    <div style="background:#1a1a1a; padding:30px; border-radius:10px; border:1px solid var(--primary);">
+        <input type="password" id="adminPass" placeholder="Admin Password" style="padding:10px; width:100%;">
+        <button onclick="checkLogin()" style="width:100%; margin-top:10px; padding:10px; background:var(--primary); border:none; font-weight:bold;">LOGIN</button>
     </div>
+</div>
 
-    <div id="main-content" style="display:none;">
-        <h2>Mura Billiards PH | Owner Control</h2>
-
-        <div class="admin-grid">
-            <div class="section">
-                <h3>Discount Manager</h3>
-                <input type="text" id="promoCode" placeholder="Code (e.g. MURA500)">
-                <input type="number" id="promoAmount" placeholder="Amount (₱)">
-                <button class="btn" onclick="createDiscount()">Activate Sale</button>
-                <div id="promo-list" style="margin-top:15px;"></div>
-            </div>
-
-            <div class="section">
-                <h3>Post Review</h3>
-                <input type="text" id="revName" placeholder="Customer Name">
-                <select id="revItem">
-                    <option value="Mini Table (120x75cm)">Mini Table</option>
-                    <option value="Jr. Size 4x7">Jr. Size 4x7</option>
-                </select>
-                <textarea id="revText" placeholder="Review content..."></textarea>
-                <button class="btn" onclick="postReview()">Post Review</button>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>Customer Orders (Total Revenue: <span id="total-revenue" style="color:var(--primary)">₱0</span>)</h3>
-            <div id="order-list">Loading orders...</div>
-        </div>
+<div id="main-content" style="display:none;">
+    <h2>Admin Dashboard</h2>
+    <div class="section">
+        <h3>Total DP Revenue: <span id="total-revenue" style="color:var(--primary)">₱0</span></h3>
     </div>
+    <div id="order-list"></div>
+</div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
-            authDomain: "mura-billiards-ph.firebaseapp.com",
-            projectId: "mura-billiards-ph",
-            storageBucket: "mura-billiards-ph.firebasestorage.app",
-            messagingSenderId: "959920092233",
-            appId: "1:959920092233:web:d224b24baa4f3284467b98"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
+        authDomain: "mura-billiards-ph.firebaseapp.com",
+        projectId: "mura-billiards-ph",
+        storageBucket: "mura-billiards-ph.firebasestorage.app",
+        messagingSenderId: "959920092233",
+        appId: "1:959920092233:web:d224b24baa4f3284467b98"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-        function checkLogin() {
-            if(document.getElementById('adminPass').value === "mura2026") {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-            } else { alert("Wrong password!"); }
-        }
+    function checkLogin() {
+        if(document.getElementById('adminPass').value === "mura2026") {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        } else { alert("Access Denied"); }
+    }
 
-        async function createDiscount() {
-            const code = document.getElementById('promoCode').value.toUpperCase();
-            const amt = document.getElementById('promoAmount').value;
-            if(!code || !amt) return alert("Fill all fields!");
-            await db.collection("discounts").doc(code).set({ amount: parseInt(amt) });
-            alert("Promo Activated!");
-        }
+    db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
+        const list = document.getElementById('order-list');
+        let revenue = 0;
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const o = doc.data();
+            
+            // MATH FIX: Strip non-numeric characters (₱ and commas) so JS can add them
+            let dpString = o.dp_amount || "0";
+            let dpNumeric = parseFloat(dpString.replace(/[^\d.-]/g, '')) || 0;
+            revenue += dpNumeric;
 
-        db.collection("discounts").onSnapshot(snap => {
-            const list = document.getElementById('promo-list');
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                list.innerHTML += `<div class="promo-pill"><span>${doc.id} (-₱${doc.data().amount})</span><button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End</button></div>`;
-            });
+            list.innerHTML += `<div class="order-card">
+                <button class="btn-del" onclick="deleteDoc('${doc.id}')">Delete</button>
+                <p><b>Name:</b> ${o.customer_name}</p>
+                <p><b>Address:</b> ${o.address}</p>
+                <p><b>Items:</b> ${o.items}</p>
+                <p><b>DP Paid:</b> <span style="color:var(--primary)">${o.dp_amount}</span></p>
+                <p><b>Ref:</b> ${o.ref_no}</p>
+            </div>`;
         });
+        document.getElementById('total-revenue').innerText = "₱" + revenue.toLocaleString();
+    });
 
-        async function postReview() {
-            const name = document.getElementById('revName').value;
-            const text = document.getElementById('revText').value;
-            if(!name || !text) return alert("Fill all fields!");
-            await db.collection("reviews").add({ name, comment: text, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            alert("Review Posted!");
-        }
-
-        db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
-            const list = document.getElementById('order-list');
-            let revenue = 0;
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const o = doc.data();
-                
-                // FIXED REVENUE MATH: Tinatanggal ang symbols bago i-parse
-                let rawValue = o.dp_amount ? o.dp_amount.toString() : "0";
-                const dpClean = parseFloat(rawValue.replace(/[^\d.-]/g, '')) || 0;
-                revenue += dpClean;
-
-                list.innerHTML += `<div class="order-card">
-                    <button class="btn-del" onclick="deleteDoc('orders', '${doc.id}')">Delete</button>
-                    <p><b>Name:</b> ${o.customer_name}</p>
-                    <p><b>Address:</b> ${o.address}</p>
-                    <p><b>Mobile:</b> ${o.mobile}</p>
-                    <p><b>Items:</b> ${o.items}</p>
-                    <p><b>DP Paid:</b> <span style="color:var(--primary)">${o.dp_amount}</span></p>
-                    <p><b>Ref No:</b> ${o.ref_no}</p>
-                </div>`;
-            });
-            document.getElementById('total-revenue').innerText = "₱" + revenue.toLocaleString();
-        });
-
-        async function deleteDoc(col, id) { if(confirm("Delete this?")) await db.collection(col).doc(id).delete(); }
-    </script>
+    async function deleteDoc(id) { if(confirm("Delete order?")) await db.collection("orders").doc(id).delete(); }
+</script>
 </body>
 </html>
