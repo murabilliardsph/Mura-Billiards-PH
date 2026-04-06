@@ -19,18 +19,19 @@
         .p-img { width: 100%; height: 200px; object-fit: cover; background: #222; }
         .p-info { padding: 15px; }
         .price { color: var(--primary); font-size: 1.4rem; font-weight: bold; }
+        .ship-fee { font-size: 11px; color: #888; margin-bottom: 5px; }
         .specs-box { font-size: 11px; color: #aaa; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--primary); }
         .btn-add { width: 100%; background: var(--primary); color: black; border: none; padding: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 15px; text-transform: uppercase; }
         
-        /* CART SIDEBAR */
         #cart-sidebar { position: fixed; right: -100%; top: 0; width: 100%; max-width: 400px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 25px; border-left: 2px solid var(--primary); overflow-y: auto; }
         #cart-sidebar.open { right: 0; }
-        .back-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+        .back-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 14px; margin-bottom: 20px; text-decoration: underline; }
         
         input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; }
-        .eta-display { font-size: 12px; color: var(--primary); margin-top: 10px; font-weight: bold; text-align: center; }
         #cart-trigger { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: black; padding: 15px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1000; }
-        .review-card { background: #111; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #222; }
+        
+        .tc-box { font-size: 11px; color: #888; background: #111; padding: 10px; border-radius: 5px; border: 1px solid #333; margin-top: 15px; }
+        .step-2 { display: none; }
     </style>
 </head>
 <body>
@@ -43,43 +44,50 @@
 <div class="container">
     <div class="grid">
         <div class="product-card">
-            <img src="images/mini.jpg" class="p-img">
+            <img src="images/mini-table.jpg" class="p-img">
             <div class="p-info">
                 <h3>Mini Table (120x75cm)</h3>
                 <p class="price">₱1,500</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.</div>
+                <p class="ship-fee">+ ₱185 Shipping Fee</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Mini Table', 1500, 185)">Add to Cart</button>
             </div>
         </div>
+
         <div class="product-card">
-            <img src="images/blue.jpg" class="p-img">
+            <img src="images/jr-blue.jpg" class="p-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Blue)</h3>
                 <p class="price">₱5,000</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <p class="ship-fee">+ ₱285 Shipping Fee</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
+
         <div class="product-card">
-            <img src="images/green.jpg" class="p-img">
+            <img src="images/jr-green.jpg" class="p-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Green)</h3>
                 <p class="price">₱5,000</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <p class="ship-fee">+ ₱285 Shipping Fee</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
+
         <div class="product-card">
-            <img src="images/black.jpg" class="p-img">
+            <img src="images/jr-black.jpg" class="p-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Black)</h3>
                 <p class="price">₱6,500</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> Premium Black Finish. 2 Cue (Std), 16 Balls (Std), Complete Kit.</div>
+                <p class="ship-fee">+ ₱285 Shipping Fee</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> Premium Black Edition. Complete Accessories.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button>
             </div>
         </div>
     </div>
-
+    
     <div style="margin-top:40px;">
         <h3 style="color:var(--primary);">Verified Reviews ⭐⭐⭐⭐⭐</h3>
         <div id="reviews-list"></div>
@@ -89,25 +97,42 @@
 <div id="cart-trigger" onclick="toggleCart(true)">🛒 CART (<span id="cart-count">0</span>)</div>
 
 <div id="cart-sidebar">
-    <button class="back-btn" onclick="toggleCart(false)">← Back to Shop</button>
-    <h3 style="color:var(--primary);">CHECKOUT</h3>
-    <input type="text" id="cName" placeholder="Full Name">
-    <input type="text" id="cMobile" placeholder="Mobile Number">
-    <textarea id="cAddr" placeholder="Complete Address"></textarea>
-    <select id="region" onchange="updateUI()">
-        <option value="Luzon">Luzon (3-5 Days)</option>
-        <option value="Visayas">Visayas (7-10 Days)</option>
-        <option value="Mindanao">Mindanao (10-14 Days)</option>
-    </select>
-    <div id="eta-text" class="eta-display">Estimated Delivery: 3-5 Days</div>
-    <div style="background:#111; padding:15px; margin-top:15px; border-radius:8px;">
-        <p>Total: <span id="total-val" style="float:right;">₱0</span></p>
-        <p style="color:var(--primary); font-weight:bold;">DP (40%): <span id="dp-val" style="float:right;">₱0</span></p>
+    <div class="step-1" id="step-1">
+        <button class="back-btn" onclick="toggleCart(false)">← Back to Shop</button>
+        <h3 style="color:var(--primary);">BUYER DETAILS</h3>
+        <input type="text" id="cName" placeholder="Full Name">
+        <input type="text" id="cMobile" placeholder="Mobile Number">
+        <textarea id="cAddr" placeholder="Complete Address"></textarea>
+        <select id="region" onchange="updateUI()">
+            <option value="Luzon">Luzon (3-5 Days)</option>
+            <option value="Visayas">Visayas (7-10 Days)</option>
+            <option value="Mindanao">Mindanao (10-14 Days)</option>
+        </select>
+        <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
+        
+        <div class="tc-box">
+            <b>Terms & Conditions:</b><br>
+            • Made-to-Order basis.<br>
+            • 40% Downpayment required to process.<br>
+            • Balance payment upon delivery (COD).
+        </div>
+        
+        <div style="background:#111; padding:15px; margin-top:15px; border-radius:8px;">
+            <p>Total: <span id="total-val" style="float:right;">₱0</span></p>
+            <p style="color:var(--primary); font-weight:bold;">DP (40%): <span id="dp-val" style="float:right;">₱0</span></p>
+        </div>
+        <button class="btn-add" onclick="goToStep2()">NEXT: PAYMENT</button>
     </div>
-    <div style="margin-top:20px; text-align:center;">
-        <img src="images/qr.jpg" style="width:180px; border-radius:10px; margin-bottom:10px;">
-        <input type="text" id="refNo" placeholder="Gcash Ref Number">
-        <button class="btn-add" onclick="finalizeOrder()">Place Order</button>
+
+    <div class="step-2" id="step-2">
+        <button class="back-btn" onclick="goToStep1()">← Back to Details</button>
+        <h3 style="color:var(--primary);">GCASH PAYMENT</h3>
+        <p style="font-size:12px; margin-bottom:10px;">Scan QR to pay the 40% Downpayment.</p>
+        <div style="text-align:center;">
+            <img src="images/qr.jpg" style="width:200px; border-radius:10px; margin-bottom:15px; border: 1px solid #333;">
+            <input type="text" id="refNo" placeholder="GCash Reference Number">
+            <button class="btn-add" onclick="finalizeOrder()">Place Order Now</button>
+        </div>
     </div>
 </div>
 
@@ -123,21 +148,40 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let cart = [];
+    let cart = [], discount = 0;
 
     function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
+    function goToStep2() {
+        if(!document.getElementById('cName').value || !document.getElementById('cAddr').value) return alert("Fill up name and address!");
+        if(cart.length === 0) return alert("Cart is empty!");
+        document.getElementById('step-1').style.display = 'none';
+        document.getElementById('step-2').style.display = 'block';
+    }
+    function goToStep1() {
+        document.getElementById('step-1').style.display = 'block';
+        document.getElementById('step-2').style.display = 'none';
+    }
+
     function addToCart(n, p, s) { cart.push({n, p, s}); updateUI(); toggleCart(true); }
 
     function updateUI() {
         let total = 0; cart.forEach(i => total += (i.p + i.s));
+        total -= discount;
         document.getElementById('cart-count').innerText = cart.length;
-        document.getElementById('total-val').innerText = "₱" + total.toLocaleString();
-        document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
-        const reg = document.getElementById('region').value;
-        document.getElementById('eta-text').innerText = "Estimated Delivery: " + (reg==="Luzon"?"3-5 Days":reg==="Visayas"?"7-10 Days":"10-14 Days");
+        document.getElementById('total-val').innerText = "₱" + (total > 0 ? total : 0).toLocaleString();
+        document.getElementById('dp-val').innerText = "₱" + Math.floor(total * 0.4).toLocaleString();
+    }
+
+    async function applyPromo() {
+        const code = document.getElementById('promoCode').value.toUpperCase();
+        const doc = await db.collection("discounts").doc(code).get();
+        if(doc.exists) { discount = doc.data().amount; updateUI(); alert("Promo Applied!"); }
     }
 
     async function finalizeOrder() {
+        const ref = document.getElementById('refNo').value;
+        if(!ref) return alert("Enter GCash Reference Number!");
+
         const orderData = {
             customer_name: document.getElementById('cName').value,
             customer_mobile: document.getElementById('cMobile').value,
@@ -145,19 +189,18 @@
             order_items: cart.map(i=>i.n).join(", "),
             order_total: document.getElementById('total-val').innerText,
             order_dp: document.getElementById('dp-val').innerText,
-            gcash_ref: document.getElementById('refNo').value,
+            gcash_ref: ref,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-        if(!orderData.customer_name || !orderData.gcash_ref) return alert("Fill all details!");
         await db.collection("orders").add(orderData);
-        window.location.href = `https://t.me/murabilliardph?text=⭐NEW ORDER⭐%0AName: ${orderData.customer_name}%0ADP: ${orderData.order_dp}`;
+        window.location.href = `https://t.me/murabilliardph?text=⭐NEW ORDER⭐%0AName: ${orderData.customer_name}%0ADP: ${orderData.order_dp}%0ARef: ${ref}`;
     }
 
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
         const list = document.getElementById('reviews-list'); list.innerHTML = "";
         snap.forEach(doc => { 
             const r = doc.data();
-            list.innerHTML += `<div class="review-card"><div style="color:#ffcc00">⭐⭐⭐⭐⭐</div><b>${r.name}</b><p style="font-size:13px; color:#888;">${r.comment}</p></div>`;
+            list.innerHTML += `<div class="review-card"><div style="color:#ffcc00">⭐⭐⭐⭐⭐</div><b>${r.name || 'Customer'}</b><p style="font-size:13px; color:#888;">${r.comment || ''}</p></div>`;
         });
     });
 </script>
