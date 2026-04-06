@@ -27,12 +27,17 @@
         #cart-sidebar.open { right: 0; }
         .back-btn { background: none; border: none; color: #888; cursor: pointer; font-size: 14px; margin-bottom: 20px; text-decoration: underline; }
         
+        .cart-item { display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222; font-size: 13px; }
+        .remove-btn { color: #ff4444; cursor: pointer; font-weight: bold; padding: 5px; font-size: 16px; }
+        
         input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; }
         #cart-trigger { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: black; padding: 15px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1000; }
         
         .tc-box { font-size: 11px; color: #888; background: #111; padding: 10px; border-radius: 5px; border: 1px solid #333; margin-top: 15px; }
         .step-2 { display: none; }
         .review-card { background: #111; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #222; }
+        .payment-summary { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222; text-align: left; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -100,26 +105,18 @@
 <div id="cart-sidebar">
     <div class="step-1" id="step-1">
         <button class="back-btn" onclick="toggleCart(false)">← Back to Shop</button>
-        <h3 style="color:var(--primary);">BUYER DETAILS</h3>
+        <h3 style="color:var(--primary);">YOUR CART</h3>
+        <div id="cart-items-list" style="margin-top:10px;"></div>
+        
+        <h3 style="color:var(--primary); margin-top:20px;">BUYER DETAILS</h3>
         <input type="text" id="cName" placeholder="Full Name">
         <input type="text" id="cMobile" placeholder="Mobile Number">
         <textarea id="cAddr" placeholder="Complete Address"></textarea>
-        <select id="region" onchange="updateUI()">
-            <option value="Luzon">Luzon (3-5 Days)</option>
-            <option value="Visayas">Visayas (7-10 Days)</option>
-            <option value="Mindanao">Mindanao (10-14 Days)</option>
-        </select>
         <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
         
-        <div class="tc-box">
-            <b>Terms & Conditions:</b><br>
-            • Made-to-Order basis.<br>
-            • 40% Downpayment required to process.<br>
-            • Balance payment upon delivery (COD).
-        </div>
-        
-        <div style="background:#111; padding:15px; margin-top:15px; border-radius:8px;">
-            <p>Total: <span id="total-val" style="float:right;">₱0</span></p>
+        <div style="background:#111; padding:15px; margin-top:15px; border-radius:8px; border: 1px solid #222;">
+            <p style="font-size: 12px; color: #888;">Discount: <span id="discount-val" style="float:right;">-₱0</span></p>
+            <p>Total: <span id="total-val" style="float:right; font-weight:bold;">₱0</span></p>
             <p style="color:var(--primary); font-weight:bold;">DP (40%): <span id="dp-val" style="float:right;">₱0</span></p>
         </div>
         <button class="btn-add" onclick="goToStep2()">NEXT: PAYMENT</button>
@@ -129,14 +126,18 @@
         <button class="back-btn" onclick="goToStep1()">← Back to Details</button>
         <h3 style="color:var(--primary);">GCASH PAYMENT</h3>
         
-        <div style="text-align:center; background:#111; padding:15px; border-radius:10px; margin-bottom:15px;">
-            <p style="font-size:12px; color:#888;">Amount to Pay (DP):</p>
-            <h2 id="pay-dp-val" style="color:var(--primary);">₱0</h2>
-            <p style="font-size:10px; color:#666;">Total Order: <span id="pay-total-val">₱0</span></p>
+        <div class="payment-summary">
+            <div class="summary-row"><span>Order Total:</span> <span id="pay-total-val">₱0</span></div>
+            <div class="summary-row" style="color: #ff4444;"><span>Voucher Discount:</span> <span id="pay-discount-val">-₱0</span></div>
+            <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+            <div class="summary-row" style="font-size: 16px; font-weight: bold; color: var(--primary);">
+                <span>Amount to Pay (DP):</span> <span id="pay-dp-val">₱0</span>
+            </div>
         </div>
 
         <div style="text-align:center;">
-            <img src="images/qr-code.jpg" style="width:180px; border-radius:10px; margin-bottom:15px; border: 1px solid #333;">
+            <img src="images/qr-code.jpg" style="width:250px; border-radius:10px; margin-bottom:15px; border: 2px solid white;">
+            
             <input type="text" id="refNo" placeholder="GCash Reference Number">
             
             <div style="margin-top:15px; text-align:left; font-size:11px; color:#aaa;">
@@ -165,9 +166,65 @@
 
     function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
     
+    function addToCart(n, p, s) { 
+        cart.push({id: Date.now(), n, p, s}); 
+        updateUI(); 
+        toggleCart(true); 
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(item => item.id !== id);
+        updateUI();
+    }
+
+    function updateUI() {
+        const list = document.getElementById('cart-items-list');
+        list.innerHTML = "";
+        let subtotal = 0;
+
+        cart.forEach(item => {
+            subtotal += (item.p + item.s);
+            list.innerHTML += `
+                <div class="cart-item">
+                    <span>${item.n} (₱${(item.p + item.s).toLocaleString()})</span>
+                    <span class="remove-btn" onclick="removeFromCart(${item.id})">✕</span>
+                </div>
+            `;
+        });
+
+        const totalAfterDiscount = Math.max(0, subtotal - discount);
+        const finalDP = Math.floor(totalAfterDiscount * 0.4);
+
+        // Step 1 UI
+        document.getElementById('cart-count').innerText = cart.length;
+        document.getElementById('discount-val').innerText = "-₱" + discount.toLocaleString();
+        document.getElementById('total-val').innerText = "₱" + totalAfterDiscount.toLocaleString();
+        document.getElementById('dp-val').innerText = "₱" + finalDP.toLocaleString();
+        
+        // Step 2 UI (Detailed)
+        document.getElementById('pay-total-val').innerText = "₱" + subtotal.toLocaleString();
+        document.getElementById('pay-discount-val').innerText = "-₱" + discount.toLocaleString();
+        document.getElementById('pay-dp-val').innerText = "₱" + finalDP.toLocaleString();
+    }
+
+    async function applyPromo() {
+        const code = document.getElementById('promoCode').value.toUpperCase().trim();
+        if(!code) { discount = 0; updateUI(); return; }
+        const doc = await db.collection("discounts").doc(code).get();
+        if(doc.exists) { 
+            discount = doc.data().amount; 
+            updateUI(); 
+            alert("Promo Applied! -₱" + discount); 
+        } else { 
+            discount = 0;
+            updateUI();
+            alert("Invalid Promo Code"); 
+        }
+    }
+
     function goToStep2() {
-        if(!document.getElementById('cName').value || !document.getElementById('cAddr').value) return alert("Fill up name and address!");
         if(cart.length === 0) return alert("Cart is empty!");
+        if(!document.getElementById('cName').value || !document.getElementById('cAddr').value) return alert("Please fill up name and address!");
         document.getElementById('step-1').style.display = 'none';
         document.getElementById('step-2').style.display = 'block';
     }
@@ -175,29 +232,6 @@
     function goToStep1() {
         document.getElementById('step-1').style.display = 'block';
         document.getElementById('step-2').style.display = 'none';
-    }
-
-    function addToCart(n, p, s) { cart.push({n, p, s}); updateUI(); toggleCart(true); }
-
-    function updateUI() {
-        let total = 0; cart.forEach(i => total += (i.p + i.s));
-        total -= discount;
-        const finalTotal = "₱" + (total > 0 ? total : 0).toLocaleString();
-        const finalDP = "₱" + Math.floor(total * 0.4).toLocaleString();
-
-        document.getElementById('cart-count').innerText = cart.length;
-        document.getElementById('total-val').innerText = finalTotal;
-        document.getElementById('dp-val').innerText = finalDP;
-        document.getElementById('pay-total-val').innerText = finalTotal;
-        document.getElementById('pay-dp-val').innerText = finalDP;
-    }
-
-    async function applyPromo() {
-        const code = document.getElementById('promoCode').value.toUpperCase().trim();
-        if(!code) return;
-        const doc = await db.collection("discounts").doc(code).get();
-        if(doc.exists) { discount = doc.data().amount; updateUI(); alert("Promo Applied!"); }
-        else { alert("Invalid Code"); }
     }
 
     async function finalizeOrder() {
@@ -213,6 +247,7 @@
             customer_address: document.getElementById('cAddr').value,
             order_items: cart.map(i=>i.n).join(", "),
             order_total: document.getElementById('total-val').innerText,
+            order_discount: "₱" + discount.toLocaleString(),
             order_dp: document.getElementById('dp-val').innerText,
             gcash_ref: ref,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -226,6 +261,7 @@
                     `📍 Address: ${orderData.customer_address}%0A` +
                     `📦 Items: ${orderData.order_items}%0A%0A` +
                     `💰 Total: ${orderData.order_total}%0A` +
+                    `🎟️ Discount: ${orderData.order_discount}%0A` +
                     `💳 DP Paid: ${orderData.order_dp}%0A` +
                     `📝 Ref No: ${ref}`;
 
@@ -233,13 +269,12 @@
     }
 
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
-        const list = document.getElementById('reviews-list'); list.innerHTML = "";
+        const rList = document.getElementById('reviews-list'); rList.innerHTML = "";
         snap.forEach(doc => { 
             const r = doc.data();
-            list.innerHTML += `<div class="review-card"><div style="color:#ffcc00">⭐⭐⭐⭐⭐</div><b>${r.name || 'Customer'}</b><p style="font-size:13px; color:#888;">${r.comment || ''}</p></div>`;
+            rList.innerHTML += `<div class="review-card"><div style="color:#ffcc00">⭐⭐⭐⭐⭐</div><b>${r.name || 'Customer'}</b><p style="font-size:13px; color:#888;">${r.comment || ''}</p></div>`;
         });
     });
 </script>
 </body>
-    </html>
-    
+</html>
