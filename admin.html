@@ -19,7 +19,9 @@
         .btn { width: 100%; background: var(--primary); border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 6px; margin-top: 15px; text-transform: uppercase; }
         .btn-del { background: #ff3d00; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; float: right; }
         .promo-pill, .review-item { background: #111; padding: 10px; border-radius: 6px; margin-top: 10px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-        .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); }
+        .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); position: relative; }
+        .order-card p { font-size: 13px; margin-bottom: 4px; color: #ccc; }
+        .order-card b { color: var(--primary); font-size: 14px; }
     </style>
 </head>
 <body>
@@ -37,32 +39,28 @@
 
         <div class="admin-grid">
             <div class="section">
-                <h3>Discount & Sale Manager</h3>
+                <h3>Discount Manager</h3>
                 <input type="text" id="promoCode" placeholder="Code (e.g. MURA500)">
-                <input type="number" id="promoAmount" placeholder="Discount Amount (₱)">
+                <input type="number" id="promoAmount" placeholder="Amount (₱)">
                 <button class="btn" onclick="createDiscount()">Activate Sale</button>
-                <h4 style="margin-top: 20px; font-size: 12px; color: var(--primary);">Active Promo Codes:</h4>
-                <div id="promo-list">Loading promos...</div>
+                <div id="promo-list" style="margin-top:15px;"></div>
             </div>
 
             <div class="section">
-                <h3>Manage Customer Reviews</h3>
+                <h3>Post Review</h3>
                 <input type="text" id="revName" placeholder="Customer Name">
                 <select id="revItem">
-                    <option value="">-- Select Item Bought --</option>
-                    <option value="Mini Table (120x75cm)">Mini Table (120x75cm)</option>
-                    <option value="Jr. Size 4x7">Jr. Size 4x7 Table</option>
+                    <option value="Mini Table (120x75cm)">Mini Table</option>
+                    <option value="Jr. Size 4x7">Jr. Size 4x7</option>
                 </select>
-                <textarea id="revText" placeholder="Paste review content..."></textarea>
+                <textarea id="revText" placeholder="Review content..."></textarea>
                 <button class="btn" onclick="postReview()">Post Review</button>
-                
-                <h4 style="margin-top: 20px; font-size: 12px; color: var(--primary);">Posted Reviews:</h4>
-                <div id="admin-reviews-list" style="max-height: 200px; overflow-y: auto; margin-top: 10px;"></div>
+                <div id="admin-reviews-list" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
         </div>
 
         <div class="section">
-            <h3>Customer Orders (Total Revenue: <span id="total-revenue">₱0</span>)</h3>
+            <h3>Customer Orders (Total Revenue: <span id="total-revenue" style="color:var(--primary)">₱0</span>)</h3>
             <div id="order-list">Loading orders...</div>
         </div>
     </div>
@@ -80,8 +78,7 @@
         const db = firebase.firestore();
 
         function checkLogin() {
-            const pass = document.getElementById('adminPass').value;
-            if(pass === "mura2026") {
+            if(document.getElementById('adminPass').value === "mura2026") {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
             } else { alert("Wrong password!"); }
@@ -90,48 +87,26 @@
         async function createDiscount() {
             const code = document.getElementById('promoCode').value.toUpperCase();
             const amt = document.getElementById('promoAmount').value;
-            if(!code || !amt) return alert("Fill up all fields!");
+            if(!code || !amt) return alert("Fill all fields!");
             await db.collection("discounts").doc(code).set({ amount: parseInt(amt) });
-            alert("Promo Code Activated!");
-            document.getElementById('promoCode').value = "";
-            document.getElementById('promoAmount').value = "";
+            alert("Promo Activated!");
         }
 
         db.collection("discounts").onSnapshot(snap => {
             const list = document.getElementById('promo-list');
             list.innerHTML = "";
             snap.forEach(doc => {
-                list.innerHTML += `<div class="promo-pill">
-                    <span><b>${doc.id}</b> (-₱${doc.data().amount})</span>
-                    <button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End Sale</button>
-                </div>`;
+                list.innerHTML += `<div class="promo-pill"><span>${doc.id} (-₱${doc.data().amount})</span><button class="btn-del" onclick="deleteDoc('discounts', '${doc.id}')">End</button></div>`;
             });
         });
 
         async function postReview() {
             const name = document.getElementById('revName').value;
             const text = document.getElementById('revText').value;
-            const item = document.getElementById('revItem').value;
-            if(!name || !text || !item) return alert("Fill all fields and select item!");
-            await db.collection("reviews").add({ 
-                name, comment: text, item_bought: item, rating: 5, date: new Date().toLocaleDateString(),
-                timestamp: firebase.firestore.FieldValue.serverTimestamp() 
-            });
+            if(!name || !text) return alert("Fill all fields!");
+            await db.collection("reviews").add({ name, comment: text, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
             alert("Review Posted!");
-            document.getElementById('revName').value = ""; document.getElementById('revText').value = "";
         }
-
-        // Live list of reviews for deletion
-        db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
-            const list = document.getElementById('admin-reviews-list');
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                list.innerHTML += `<div class="review-item">
-                    <span style="font-size:11px;"><b>${doc.data().name}</b>: ${doc.data().comment.substring(0,20)}...</span>
-                    <button class="btn-del" onclick="deleteDoc('reviews', '${doc.id}')">Delete</button>
-                </div>`;
-            });
-        });
 
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
             const list = document.getElementById('order-list');
@@ -139,19 +114,24 @@
             list.innerHTML = "";
             snap.forEach(doc => {
                 const o = doc.data();
-                const dp = parseFloat(o.dp_amount.replace(/[^\d.-]/g, '')) || 0;
-                revenue += dp;
+                // Fix for Revenue Calculation: tinatanggal ang symbols bago i-plus
+                const dpClean = parseFloat(o.dp_amount.replace(/[^\d.-]/g, '')) || 0;
+                revenue += dpClean;
+
                 list.innerHTML += `<div class="order-card">
-                    <button class="btn-del" onclick="deleteDoc('orders', '${doc.id}')">Delete Order</button>
-                    <p><b>${o.customer_name}</b> | ${o.mobile}<br>${o.items} - <span style="color:var(--primary)">${o.dp_amount}</span></p>
+                    <button class="btn-del" onclick="deleteDoc('orders', '${doc.id}')">Delete</button>
+                    <p><b>Name:</b> ${o.customer_name}</p>
+                    <p><b>Address:</b> ${o.address}</p>
+                    <p><b>Mobile:</b> ${o.mobile}</p>
+                    <p><b>Items:</b> ${o.items}</p>
+                    <p><b>DP Paid:</b> <span style="color:var(--primary)">${o.dp_amount}</span></p>
+                    <p><b>Ref No:</b> ${o.ref_no}</p>
                 </div>`;
             });
             document.getElementById('total-revenue').innerText = "₱" + revenue.toLocaleString();
         });
 
-        async function deleteDoc(col, id) {
-            if(confirm("Confirm Delete?")) { await db.collection(col).doc(id).delete(); }
-        }
+        async function deleteDoc(col, id) { if(confirm("Delete this?")) await db.collection(col).doc(id).delete(); }
     </script>
 </body>
 </html>
