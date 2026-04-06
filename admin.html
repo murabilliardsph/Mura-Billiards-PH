@@ -40,6 +40,11 @@
             <input id="vCode" placeholder="Promo Code"><input id="vAmt" type="number" placeholder="Amount (₱)"><button onclick="addV()">Save Voucher</button>
             <div id="v-list" style="margin-top:10px;"></div>
         </div>
+
+        <div class="section">
+            <h3>Post Review</h3>
+            <input id="rName" placeholder="Name"><textarea id="rText" placeholder="Comment"></textarea><button onclick="addR()">Post Review</button>
+        </div>
     </div>
 
     <script>
@@ -62,7 +67,6 @@
             
             snap.forEach(doc => {
                 const o = doc.data();
-                // Eto yung fix: binabasa nito ang bago O lumang variable name (fallback)
                 const name = o.customer_name || o.name || '---';
                 const mobile = o.customer_mobile || o.mobile || '---';
                 const addr = o.customer_address || o.address || '---';
@@ -86,13 +90,22 @@
             document.getElementById('rev-total').innerText = "₱" + rev.toLocaleString();
         });
 
-        // Voucher logic
         db.collection("discounts").onSnapshot(s => {
             const l=document.getElementById('v-list'); l.innerHTML="";
             s.forEach(d => l.innerHTML+=`<div style="display:flex; justify-content:space-between; margin-top:5px; background:#222; padding:8px; border-radius:5px;"><span>${d.id} (-₱${d.data().amount})</span><button onclick="db.collection('discounts').doc('${d.id}').delete()" style="width:auto; margin:0; background:red; font-size:10px; border:none; color:white;">X</button></div>`);
         });
 
-        async function addV() { const c=document.getElementById('vCode').value; const a=document.getElementById('vAmt').value; if(c&&a) await db.collection("discounts").doc(c.toUpperCase()).set({amount:parseInt(a)}); }
+        async function addV() { 
+            const c=document.getElementById('vCode').value.trim().toUpperCase(); 
+            const a=document.getElementById('vAmt').value; 
+            if(c&&a) { await db.collection("discounts").doc(c).set({amount:parseInt(a)}); alert("Voucher Saved!"); } 
+        }
+        
+        async function addR() { 
+            const n=document.getElementById('rName').value; 
+            const t=document.getElementById('rText').value; 
+            if(n&&t) await db.collection("reviews").add({name:n, comment:t, timestamp:firebase.firestore.FieldValue.serverTimestamp()}); 
+        }
     </script>
 </body>
 </html>
