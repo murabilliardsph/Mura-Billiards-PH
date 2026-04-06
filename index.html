@@ -151,6 +151,27 @@
 </div>
 
 <script>
+    // VISITOR LOGGER SCRIPT
+async function logVisitor() {
+    try {
+        // Kukuha tayo ng IP address gamit ang ipify API
+        const response = await fetch('https://api.ipify.org?format=json');
+        const data = await response.json();
+        const userIP = data.ip;
+
+        // I-save sa Firebase 'visitors' collection
+        // Ginagamit natin ang IP bilang Document ID para ma-count natin ang 'Unique' visitors
+        await db.collection("visitors").doc(userIP).set({
+            ip: userIP,
+            last_visit: firebase.firestore.FieldValue.serverTimestamp(),
+            device: navigator.userAgent.substring(0, 50) // Browser/Phone info
+        }, { merge: true });
+    } catch (err) {
+        console.log("Logger Error:", err);
+    }
+}
+logVisitor(); // Tawagin ang function pag-load ng page
+    
     const firebaseConfig = {
         apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
         authDomain: "mura-billiards-ph.firebaseapp.com",
