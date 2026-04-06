@@ -10,11 +10,12 @@
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #eee; }
         body { background: var(--dark); color: var(--text); padding: 15px; font-family: sans-serif; }
         .section { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid #222; margin-bottom: 15px; }
-        .order-card { background: #111; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); font-size: 13px; position: relative; line-height: 1.5; }
+        .card { background: #111; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); font-size: 13px; position: relative; line-height: 1.5; }
         input, textarea { width: 100%; padding: 10px; margin-top: 8px; background: #222; color: white; border: 1px solid #444; border-radius: 5px; }
         button { background: var(--primary); padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .del-btn { background: red; color: white; width: auto; font-size: 10px; padding: 4px 8px; position: absolute; right: 10px; top: 10px; border-radius: 3px; border:none; }
+        .del-btn { background: #ff4444; color: white; width: auto; font-size: 10px; padding: 4px 8px; position: absolute; right: 10px; top: 10px; border-radius: 3px; border:none; cursor: pointer; }
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     </style>
 </head>
 <body>
@@ -25,25 +26,39 @@
     </div>
 
     <div id="main-content" style="display:none;">
-        <div class="section" style="text-align:center;">
-            <p style="font-size:12px; color:#888;">TOTAL DP REVENUE</p>
-            <h2 id="rev-total" style="color:var(--primary); font-size:2rem;">₱0</h2>
+        <div class="stat-grid">
+            <div class="section" style="text-align:center;">
+                <p style="font-size:11px; color:#888;">TOTAL REVENUE</p>
+                <h2 id="rev-total" style="color:var(--primary);">₱0</h2>
+            </div>
+            <div class="section" style="text-align:center;">
+                <p style="font-size:11px; color:#888;">UNIQUE VISITS</p>
+                <h2 id="visit-count" style="color:var(--primary);">0</h2>
+            </div>
         </div>
 
         <div class="section">
-            <h3>Orders Tracker</h3>
-            <div id="order-list" style="margin-top:10px;"></div>
+            <h3>Recent Orders</h3>
+            <div id="order-list"></div>
         </div>
 
         <div class="section">
-            <h3>Vouchers & Promos</h3>
-            <input id="vCode" placeholder="Promo Code"><input id="vAmt" type="number" placeholder="Amount (₱)"><button onclick="addV()">Save Voucher</button>
-            <div id="v-list" style="margin-top:10px;"></div>
+            <h3>Manage Reviews</h3>
+            <input id="rName" placeholder="Customer Name"><textarea id="rText" placeholder="Their Review"></textarea>
+            <button onclick="addR()">Post Review</button>
+            <div id="admin-reviews-list" style="margin-top:15px;"></div>
         </div>
 
         <div class="section">
-            <h3>Post Review</h3>
-            <input id="rName" placeholder="Name"><textarea id="rText" placeholder="Comment"></textarea><button onclick="addR()">Post Review</button>
+            <h3>Vouchers</h3>
+            <input id="vCode" placeholder="Promo Code"><input id="vAmt" type="number" placeholder="Amount (₱)">
+            <button onclick="addV()">Save Voucher</button>
+            <div id="v-list"></div>
+        </div>
+
+        <div class="section">
+            <h3>Visitor IPs</h3>
+            <div id="visitor-list" style="font-size:11px; color:#888; max-height:150px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -61,50 +76,62 @@
 
         function check() { if(document.getElementById('pass').value === "mura2026") { document.getElementById('login-overlay').style.display='none'; document.getElementById('main-content').style.display='block'; } }
 
+        // ORDERS TRACKER
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
             const list = document.getElementById('order-list');
             let rev = 0; list.innerHTML = "";
-            
             snap.forEach(doc => {
                 const o = doc.data();
-                const name = o.customer_name || o.name || '---';
-                const mobile = o.customer_mobile || o.mobile || '---';
-                const addr = o.customer_address || o.address || '---';
-                const items = o.order_items || o.items || '---';
-                const gcash = o.gcash_ref || o.ref || '---';
-                const dpStr = o.order_dp || o.dp || '0';
-                
+                const dpStr = o.order_dp || '0';
                 rev += parseFloat(dpStr.replace(/[^\d]/g, '')) || 0;
-
                 list.innerHTML += `
-                <div class="order-card">
-                    <button class="del-btn" onclick="db.collection('orders').doc('${doc.id}').delete()">Delete</button>
-                    <b>Name:</b> ${name}<br>
-                    <b>Mobile:</b> ${mobile}<br>
-                    <b>Address:</b> ${addr}<br>
-                    <b>Items:</b> <span style="color:var(--primary)">${items}</span><br>
-                    <b>Gcash Ref:</b> ${gcash}<br>
-                    <b>DP Paid:</b> ${dpStr}
+                <div class="card">
+                    <button class="del-btn" onclick="db.collection('orders').doc('${doc.id}').delete()">Del</button>
+                    <b>${o.customer_name || 'No Name'}</b> - ${o.order_total}<br>
+                    <small>${o.order_items}</small><br>
+                    <span style="color:var(--primary)">Ref: ${o.gcash_ref}</span>
                 </div>`;
             });
             document.getElementById('rev-total').innerText = "₱" + rev.toLocaleString();
         });
 
-        db.collection("discounts").onSnapshot(s => {
-            const l=document.getElementById('v-list'); l.innerHTML="";
-            s.forEach(d => l.innerHTML+=`<div style="display:flex; justify-content:space-between; margin-top:5px; background:#222; padding:8px; border-radius:5px;"><span>${d.id} (-₱${d.data().amount})</span><button onclick="db.collection('discounts').doc('${d.id}').delete()" style="width:auto; margin:0; background:red; font-size:10px; border:none; color:white;">X</button></div>`);
+        // REVIEWS MANAGER (With Delete)
+        db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
+            const list = document.getElementById('admin-reviews-list'); list.innerHTML = "";
+            snap.forEach(doc => {
+                const r = doc.data();
+                list.innerHTML += `
+                <div class="card" style="border-left:4px solid #ffcc00">
+                    <button class="del-btn" onclick="db.collection('reviews').doc('${doc.id}').delete()">Del</button>
+                    <b>${r.name}</b><br><small>${r.comment}</small>
+                </div>`;
+            });
         });
 
-        async function addV() { 
-            const c=document.getElementById('vCode').value.trim().toUpperCase(); 
-            const a=document.getElementById('vAmt').value; 
-            if(c&&a) { await db.collection("discounts").doc(c).set({amount:parseInt(a)}); alert("Voucher Saved!"); } 
+        async function addR() {
+            const n=document.getElementById('rName').value; const t=document.getElementById('rText').value;
+            if(n&&t) { await db.collection("reviews").add({name:n, comment:t, timestamp:firebase.firestore.FieldValue.serverTimestamp()}); document.getElementById('rName').value=""; document.getElementById('rText').value=""; }
         }
-        
-        async function addR() { 
-            const n=document.getElementById('rName').value; 
-            const t=document.getElementById('rText').value; 
-            if(n&&t) await db.collection("reviews").add({name:n, comment:t, timestamp:firebase.firestore.FieldValue.serverTimestamp()}); 
+
+        // VISITOR LOGS
+        db.collection("visitors").orderBy("last_visit", "desc").onSnapshot(snap => {
+            document.getElementById('visit-count').innerText = snap.size;
+            const list = document.getElementById('visitor-list'); list.innerHTML = "";
+            snap.forEach(doc => {
+                const v = doc.data();
+                list.innerHTML += `<div>• ${v.ip} (${v.device})</div>`;
+            });
+        });
+
+        // VOUCHER LOGIC
+        db.collection("discounts").onSnapshot(s => {
+            const l=document.getElementById('v-list'); l.innerHTML="";
+            s.forEach(d => l.innerHTML+=`<div style="display:flex; justify-content:space-between; padding:5px; background:#222; margin-top:5px; border-radius:5px;"><span>${d.id} (-₱${d.data().amount})</span><button onclick="db.collection('discounts').doc('${d.id}').delete()" style="background:red; border:none; color:white; padding:2px 5px; border-radius:3px;">X</button></div>`);
+        });
+
+        async function addV() {
+            const c=document.getElementById('vCode').value.toUpperCase(); const a=document.getElementById('vAmt').value;
+            if(c&&a) { await db.collection("discounts").doc(c).set({amount:parseInt(a)}); document.getElementById('vCode').value=""; document.getElementById('vAmt').value=""; }
         }
     </script>
 </body>
