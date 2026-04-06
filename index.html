@@ -24,7 +24,6 @@
         .specs-box { font-size: 11px; color: #aaa; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--primary); }
         .btn-add { width: 100%; background: var(--primary); color: black; border: none; padding: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 15px; text-transform: uppercase; }
         
-        /* About Section Style */
         .about-section { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid #222; margin-top: 40px; }
         .about-section h3 { color: var(--primary); margin-bottom: 10px; }
         .about-section p { font-size: 14px; color: #ccc; }
@@ -44,6 +43,9 @@
         .review-card { background: #111; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #222; }
         .payment-summary { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222; text-align: left; }
         .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+        
+        /* Highlight for COD */
+        .cod-highlight { color: #ffcc00; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -138,8 +140,10 @@
         
         <div style="background:#111; padding:15px; margin-top:15px; border-radius:8px; border: 1px solid #222;">
             <p style="font-size: 12px; color: #888;">Discount: <span id="discount-val" style="float:right;">-₱0</span></p>
-            <p>Total: <span id="total-val" style="float:right; font-weight:bold;">₱0</span></p>
-            <p style="color:var(--primary); font-weight:bold;">DP (40%): <span id="dp-val" style="float:right;">₱0</span></p>
+            <p>Total Amount: <span id="total-val" style="float:right; font-weight:bold;">₱0</span></p>
+            <p style="color:var(--primary); font-weight:bold;">Reservation DP (40%): <span id="dp-val" style="float:right;">₱0</span></p>
+            <hr style="border:0; border-top:1px solid #333; margin:8px 0;">
+            <p class="cod-highlight">Remaining Balance (COD): <span id="cod-val" style="float:right;">₱0</span></p>
         </div>
         <button class="btn-add" onclick="goToStep2()">NEXT: PAYMENT</button>
     </div>
@@ -152,8 +156,11 @@
             <div class="summary-row"><span>Order Total:</span> <span id="pay-total-val">₱0</span></div>
             <div class="summary-row" style="color: #ff4444;"><span>Voucher Discount:</span> <span id="pay-discount-val">-₱0</span></div>
             <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
-            <div class="summary-row" style="font-size: 16px; font-weight: bold; color: var(--primary);">
+            <div class="summary-row" style="font-size: 15px; font-weight: bold; color: var(--primary);">
                 <span>Amount to Pay (DP):</span> <span id="pay-dp-val">₱0</span>
+            </div>
+            <div class="summary-row cod-highlight" style="font-size: 13px; margin-top:5px;">
+                <span>Balance to be paid via COD:</span> <span id="pay-cod-val">₱0</span>
             </div>
         </div>
 
@@ -232,14 +239,22 @@
             subtotal += (item.p + item.s);
             list.innerHTML += `<div class="cart-item"><span>${item.n} (₱${(item.p + item.s).toLocaleString()})</span><span class="remove-btn" onclick="removeFromCart(${item.id})">✕</span></div>`;
         });
+
         const finalTot = Math.max(0, subtotal - discount);
+        const dpAmount = Math.floor(finalTot * 0.4);
+        const codAmount = finalTot - dpAmount;
+
         document.getElementById('cart-count').innerText = cart.length;
         document.getElementById('discount-val').innerText = "-₱" + discount.toLocaleString();
         document.getElementById('total-val').innerText = "₱" + finalTot.toLocaleString();
-        document.getElementById('dp-val').innerText = "₱" + Math.floor(finalTot * 0.4).toLocaleString();
+        document.getElementById('dp-val').innerText = "₱" + dpAmount.toLocaleString();
+        document.getElementById('cod-val').innerText = "₱" + codAmount.toLocaleString();
+        
+        // Step 2 Summary
         document.getElementById('pay-total-val').innerText = "₱" + subtotal.toLocaleString();
         document.getElementById('pay-discount-val').innerText = "-₱" + discount.toLocaleString();
-        document.getElementById('pay-dp-val').innerText = "₱" + Math.floor(finalTot * 0.4).toLocaleString();
+        document.getElementById('pay-dp-val').innerText = "₱" + dpAmount.toLocaleString();
+        document.getElementById('pay-cod-val').innerText = "₱" + codAmount.toLocaleString();
     }
 
     async function applyPromo() {
@@ -275,13 +290,24 @@
             order_items: cart.map(i=>i.n).join(", "),
             order_total: document.getElementById('total-val').innerText,
             order_dp: document.getElementById('dp-val').innerText,
+            order_cod_balance: document.getElementById('cod-val').innerText,
             gcash_ref: ref,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         await db.collection("orders").add(orderData);
         
-        const msg = `⭐ NEW ORDER RECEIVED ⭐%0A👤 Name: ${orderData.customer_name}%0A📞 Mobile: ${orderData.customer_mobile}%0A📍 Region: ${orderData.customer_region}%0A🏠 Address: ${orderData.customer_address}%0A📦 Items: ${orderData.order_items}%0A💰 Total: ${orderData.order_total}%0A💳 DP: ${orderData.order_dp}%0A📝 Ref: ${ref}`;
+        const msg = `⭐ NEW ORDER RECEIVED ⭐%0A` +
+                    `👤 Name: ${orderData.customer_name}%0A` +
+                    `📞 Mobile: ${orderData.customer_mobile}%0A` +
+                    `📍 Region: ${orderData.customer_region}%0A` +
+                    `🏠 Address: ${orderData.customer_address}%0A` +
+                    `📦 Items: ${orderData.order_items}%0A` +
+                    `💰 Total: ${orderData.order_total}%0A` +
+                    `💳 DP Paid: ${orderData.order_dp}%0A` +
+                    `🚚 COD Balance: ${orderData.order_cod_balance}%0A` +
+                    `📝 Ref: ${ref}`;
+                    
         window.location.href = `https://t.me/murabilliardph?text=${msg}`;
     }
 
