@@ -11,61 +11,32 @@
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
         body { background: var(--dark); color: var(--text); line-height: 1.6; }
-        
-        /* Premium Header */
         header { text-align: center; padding: 60px 0; border-bottom: 1px solid #222; background: linear-gradient(to bottom, #111, var(--dark)); }
-        h1 { font-family: 'Oswald', sans-serif; font-size: 3rem; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
-        .tagline { color: #888; font-size: 0.9rem; margin-top: 5px; font-weight: bold; letter-spacing: 1px; }
-
+        h1 { font-family: 'Oswald', sans-serif; font-size: 3rem; color: var(--primary); text-transform: uppercase; }
         .container { max-width: 1100px; margin: auto; padding: 40px 20px; }
-
-        /* Professional Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 20px; }
-        .product-card { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #222; transition: 0.3s; position: relative; }
-        .product-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,200,83,0.1); }
-        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .product-card { background: var(--card); border-radius: 15px; overflow: hidden; border: 1px solid #222; transition: 0.3s; }
         .product-img { width: 100%; height: 220px; object-fit: cover; }
         .p-info { padding: 20px; }
-        .p-info h3 { font-family: 'Oswald', sans-serif; font-size: 1.5rem; margin-bottom: 10px; }
         .price { color: var(--primary); font-size: 1.6rem; font-weight: bold; }
-        .ship-label { font-size: 11px; color: #888; margin-bottom: 15px; display: block; }
-
         .specs-box { font-size: 11px; color: #aaa; background: #1a1a1a; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--primary); }
-        .specs-box b { color: var(--primary); }
-
-        .btn-add { width: 100%; background: var(--primary); color: black; border: none; padding: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        .btn-add:hover { filter: brightness(1.1); }
-
-        /* Sidebar Multi-Step */
-        #cart-sidebar { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 25px; border-left: 2px solid var(--primary); box-shadow: -10px 0 30px rgba(0,0,0,0.8); overflow-y: auto; }
+        .btn-add { width: 100%; background: var(--primary); color: black; border: none; padding: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; margin-top: 15px; text-transform: uppercase; }
+        #cart-sidebar { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 25px; border-left: 2px solid var(--primary); overflow-y: auto; }
         #cart-sidebar.open { right: 0; }
-        
-        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12px; color: #444; font-weight: bold; }
-        .step-indicator .active { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; }
-
+        .step-indicator { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12px; font-weight: bold; }
+        .active { color: var(--primary); }
         .checkout-step { display: none; }
         .checkout-step.active { display: block; }
-
-        input, textarea, select { width: 100%; padding: 14px; margin-top: 12px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; font-size: 14px; }
-        input:focus { border-color: var(--primary); outline: none; }
-
-        .summary-box { background: rgba(0,200,83,0.05); border: 1px dashed var(--primary); padding: 15px; margin-top: 20px; border-radius: 10px; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-
+        input, textarea, select { width: 100%; padding: 14px; margin-top: 12px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; }
         .qr-section { margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 10px; color: #000; }
-        .qr-image { width: 100%; max-width: 180px; border-radius: 8px; }
-
-        #cart-trigger { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: black; padding: 18px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,200,83,0.2); z-index: 1000; }
-        
-        .reviews-sec { margin-top: 80px; padding: 40px 0; border-top: 1px solid #222; }
-        .review-card { background: #111; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--primary); }
+        #cart-trigger { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: black; padding: 18px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1000; }
     </style>
 </head>
 <body>
 
 <header>
     <h1>MURA BILLIARDS PH</h1>
-    <p class="tagline">AFFORDABLE FOLDABLE BILLIARD TABLES • NATIONWIDE SHIPPING</p>
+    <p style="color:#888;">AFFORDABLE FOLDABLE BILLIARD TABLES • NATIONWIDE SHIPPING</p>
 </header>
 
 <div class="container">
@@ -75,117 +46,62 @@
             <div class="p-info">
                 <h3>Mini Table (120x75cm)</h3>
                 <p class="price">₱1,500</p>
-                <span class="ship-label">+ ₱185 Shipping</span>
-                <div class="specs-box">
-                    <b>SPECS:</b> MDF Surface, Metal Corner/Leg, Foldable.<br>
-                    <b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.
-                </div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Mini Table (120x75cm)', 1500, 185)">Add to Cart</button>
             </div>
         </div>
-
         <div class="product-card">
             <img src="images/jr-blue.jpg" class="product-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Blue)</h3>
                 <p class="price">₱5,000</p>
-                <span class="ship-label">+ ₱285 Shipping</span>
-                <div class="specs-box">
-                    <b>SPECS:</b> MDF Surface, Metal Corner/Leg, Foldable.<br>
-                    <b>INCLUSIONS:</b> 2 Cue (Std size), 16 Balls (Std size), 2 Chalk, Brush, Triangle.
-                </div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
-
         <div class="product-card">
             <img src="images/jr-green.jpg" class="product-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Green)</h3>
                 <p class="price">₱5,000</p>
-                <span class="ship-label">+ ₱285 Shipping</span>
-                <div class="specs-box">
-                    <b>SPECS:</b> MDF Surface, Metal Corner/Leg, Foldable.<br>
-                    <b>INCLUSIONS:</b> 2 Cue (Std size), 16 Balls (Std size), 2 Chalk, Brush, Triangle.
-                </div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
-
         <div class="product-card">
             <img src="images/jr-black.jpg" class="product-img">
             <div class="p-info">
                 <h3>Jr. Size 4x7 (Black Edition)</h3>
                 <p class="price">₱6,500</p>
-                <span class="ship-label">+ ₱285 Shipping</span>
-                <div class="specs-box">
-                    <b>SPECS:</b> MDF Surface, Metal Corner/Leg, Foldable.<br>
-                    <b>INCLUSIONS:</b> 2 Cue (Std size), 16 Balls (Std size), 2 Chalk, Brush, Triangle.
-                </div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button>
             </div>
         </div>
     </div>
-
-    <div class="reviews-sec">
-        <h2 style="font-family: Oswald; margin-bottom: 20px;">CUSTOMER REVIEWS</h2>
-        <div id="reviews-placeholder">Loading reviews...</div>
-    </div>
+    <div id="reviews-placeholder" style="margin-top:50px;"></div>
 </div>
 
 <div id="cart-trigger" onclick="toggleCart(true)">🛒 VIEW CART (<span id="cart-count">0</span>)</div>
 
 <div id="cart-sidebar">
-    <div class="step-indicator">
-        <span id="st1" class="active">1. DETAILS</span>
-        <span id="st2">2. PAYMENT</span>
-    </div>
-
+    <div class="step-indicator"><span id="st1" class="active">1. DETAILS</span><span id="st2">2. PAYMENT</span></div>
     <div id="step1" class="checkout-step active">
-        <h2 style="font-family: Oswald; margin-bottom: 15px;">ORDER DETAILS</h2>
         <div id="cart-items-list"></div>
-        
-        <select id="area" onchange="updateArrival()">
-            <option value="">Select Delivery Area</option>
-            <option value="Manila">Metro Manila (2-3 Days)</option>
-            <option value="Visayas">Visayas (5-7 Days)</option>
-            <option value="Mindanao">Mindanao (5-7 Days)</option>
-        </select>
-        <p id="arrival-msg" style="font-size: 11px; color: var(--primary); margin-top: 5px;"></p>
-        
-        <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
         <input type="text" id="cName" placeholder="Full Name">
         <input type="text" id="cMobile" placeholder="Mobile Number">
-        <textarea id="cAddr" placeholder="Complete Shipping Address" rows="2"></textarea>
-
-        <div class="summary-box">
-            <div class="summary-row"><span>Subtotal:</span> <span id="sub-val">₱0</span></div>
-            <div class="summary-row"><span>Shipping:</span> <span id="ship-val">₱0</span></div>
-            <div class="summary-row" style="color: #ff3d00;"><span>Discount:</span> -<span id="disc-val">₱0</span></div>
-        </div>
-        
+        <textarea id="cAddr" placeholder="Complete Shipping Address"></textarea>
+        <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
         <button class="btn-add" onclick="goToStep(2)">Next: Payment</button>
-        <button onclick="toggleCart(false)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Continue Shopping</button>
     </div>
-
     <div id="step2" class="checkout-step">
-        <h2 style="font-family: Oswald; margin-bottom: 15px;">PAYMENT</h2>
-        <p style="font-size: 12px; color: #888; margin-bottom: 15px;">Scan the QR to pay the 40% Downpayment:</p>
-
         <div class="qr-section">
-            <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px;">GCASH / MAYA QR</p>
-            <img src="images/qr-code.jpg" class="qr-image">
-            <h3 style="margin-top: 15px; color: var(--primary); font-size: 1.4rem;">DP: <span id="dp-val">₱0</span></h3>
+            <img src="images/qr-code.jpg" style="width:180px;">
+            <h3 style="margin-top:10px;">DP: <span id="dp-val">₱0</span></h3>
         </div>
-
         <input type="text" id="refNo" placeholder="Gcash/Maya Ref Number">
-        
-        <label style="font-size: 11px; display: block; margin-top: 20px; color: #666;">
-            <input type="checkbox" id="terms-check"> I confirm that all details are correct.
-        </label>
-
-        <button class="btn-add" style="margin-top: 20px;" onclick="finalizeOrder()">Submit Order</button>
-        <button onclick="goToStep(1)" style="width: 100%; background: none; color: #555; border: none; padding: 15px; cursor: pointer;">Go Back</button>
+        <label style="font-size:11px;"><input type="checkbox" id="terms-check"> Correct details.</label>
+        <button class="btn-add" onclick="finalizeOrder()">Submit Order</button>
+        <button onclick="goToStep(1)" style="width:100%; background:none; color:#555; border:none; padding:10px;">Back</button>
     </div>
 </div>
 
@@ -201,92 +117,45 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
-        const revContainer = document.getElementById('reviews-placeholder');
-        revContainer.innerHTML = "";
-        snap.forEach(doc => {
-            const r = doc.data();
-            revContainer.innerHTML += `<div class="review-card"><div style="color: #ffcc00;">★★★★★</div><p>"${r.comment}"</p><small style="color: #666; font-weight: bold;">— ${r.name} (Verified Buyer)</small></div>`;
-        });
-    });
+    let cart = [], discountAmount = 0;
 
-    let cart = [];
-    let discountAmount = 0;
-
-    function addToCart(name, price, ship) { 
-        cart.push({ id: Date.now(), name, price, ship }); 
-        updateCartUI(); 
-        toggleCart(true); 
+    function addToCart(name, price, ship) { cart.push({id:Date.now(), name, price, ship}); updateUI(); toggleCart(true); }
+    function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
+    function goToStep(s) {
+        if(s===2 && (!document.getElementById('cName').value || cart.length === 0)) return alert("Check name and cart!");
+        document.querySelectorAll('.checkout-step').forEach(x=>x.classList.remove('active'));
+        document.getElementById('step'+s).classList.add('active');
     }
 
-    function removeFromCart(id) {
-        cart = cart.filter(i => i.id !== id);
-        updateCartUI();
-    }
-
-    function toggleCart(show) { 
-        document.getElementById('cart-sidebar').classList.toggle('open', show);
-        if(!show) goToStep(1);
-    }
-
-    function goToStep(step) {
-        if(step === 2 && (cart.length === 0 || !document.getElementById('cName').value)) {
-            alert("Please add items and enter your name.");
-            return;
-        }
-        document.querySelectorAll('.checkout-step').forEach(s => s.classList.remove('active'));
-        document.getElementById('step' + step).classList.add('active');
-        document.getElementById('st1').classList.toggle('active', step === 1);
-        document.getElementById('st2').classList.toggle('active', step === 2);
-    }
-
-    function updateCartUI() {
-        const list = document.getElementById('cart-items-list');
-        let sub = 0, ship = 0; list.innerHTML = "";
-        cart.forEach(i => { 
-            sub += i.price; ship += i.ship; 
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; background:#1a1a1a; padding:10px; border-radius:5px; margin-bottom:8px; font-size:12px;"><span>${i.name}</span><span>₱${i.price.toLocaleString()} <span style="color:#ff3d00; cursor:pointer; margin-left:10px;" onclick="removeFromCart(${i.id})">✖</span></span></div>`; 
-        });
-        const total = (sub + ship) - discountAmount;
+    function updateUI() {
+        let sub=0, ship=0;
+        cart.forEach(i=>{ sub+=i.price; ship+=i.ship; });
+        const total = (sub+ship)-discountAmount;
         document.getElementById('cart-count').innerText = cart.length;
-        document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
-        document.getElementById('ship-val').innerText = "₱" + ship.toLocaleString();
-        document.getElementById('disc-val').innerText = "₱" + discountAmount.toLocaleString();
         document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
-    }
-
-    async function applyPromo() {
-        const code = document.getElementById('promoCode').value.toUpperCase();
-        if(!code) { discountAmount = 0; updateCartUI(); return; }
-        const doc = await db.collection("discounts").doc(code).get();
-        discountAmount = doc.exists ? doc.data().amount : 0;
-        if(!doc.exists) alert("Invalid Promo Code");
-        updateCartUI();
-    }
-
-    function updateArrival() {
-        const a = document.getElementById('area').value;
-        document.getElementById('arrival-msg').innerText = a ? (a === "Manila" ? "ETA: 2-3 Days" : "ETA: 5-7 Days") : "";
     }
 
     async function finalizeOrder() {
         const ref = document.getElementById('refNo').value;
-        if(!ref || !document.getElementById('terms-check').checked) return alert("Please fill all payment details.");
+        const name = document.getElementById('cName').value;
+        const addr = document.getElementById('cAddr').value;
+        if(!ref || !name || !addr) return alert("Fill all fields!");
 
-        const orderData = { 
-            customer_name: document.getElementById('cName').value, 
+        const orderData = {
+            customer_name: name,
             mobile: document.getElementById('cMobile').value,
-            address: document.getElementById('cAddr').value,
-            items: cart.map(i => i.name).join(", "), 
+            address: addr,
+            items: cart.map(i=>i.name).join(", "),
             dp_amount: document.getElementById('dp-val').innerText,
             ref_no: ref,
-            status: "Pending",
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         await db.collection("orders").add(orderData);
-        alert("Order Submitted! Redirecting to Telegram."); 
-        window.location.href = `https://t.me/murabilliardph?text=New Order:%0AItems: ${orderData.items}%0ADP: ${orderData.dp_amount}%0ARef: ${ref}`;
+        
+        // Fixed Telegram Format
+        const msg = `New Order:%0AItems: ${orderData.items}%0AName: ${orderData.customer_name}%0AAddress: ${orderData.address}%0ADP: ${orderData.dp_amount}%0ARef: ${orderData.ref_no}`;
+        window.location.href = `https://t.me/murabilliardph?text=${msg}`;
     }
 </script>
 </body>
