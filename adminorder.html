@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Order Manager | Mura Billiards PH</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <style>
+        :root { --primary: #00c853; }
+        body { background: #050505; color: white; font-family: sans-serif; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-bottom: 20px; }
+        .order-card { background: #111; padding: 20px; border-radius: 12px; border-left: 5px solid #333; margin-bottom: 15px; position: relative; }
+        .order-card.new { border-left-color: var(--primary); }
+        .cust-name { font-size: 1.2rem; color: var(--primary); font-weight: bold; }
+        .cust-info { font-size: 14px; color: #aaa; margin: 5px 0; }
+        .status-now { background: #222; padding: 5px 10px; border-radius: 5px; font-size: 12px; color: #ffcc00; }
+        select { width: 100%; padding: 12px; margin-top: 15px; background: #222; color: white; border: 1px solid #444; border-radius: 8px; }
+        button { width: 100%; padding: 12px; margin-top: 10px; background: var(--primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>ORDER MANAGER</h2>
+        <button onclick="location.reload()" style="width:auto; padding: 5px 15px;">Refresh</button>
+    </div>
+
+    <div id="admin-list">Loading orders...</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCYH_a--pEIXJ09NNNymtMibHQv5M6ogL4",
+        authDomain: "mura-billiards-ph.firebaseapp.com",
+        projectId: "mura-billiards-ph",
+        storageBucket: "mura-billiards-ph.firebasestorage.app",
+        messagingSenderId: "959920092233",
+        appId: "1:959920092233:web:d224b24baa4f3284467b98"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    async function loadOrders() {
+        const snap = await db.collection("orders").orderBy("timestamp", "desc").get();
+        const list = document.getElementById('admin-list');
+        list.innerHTML = "";
+
+        if(snap.empty) { list.innerHTML = "No orders found."; return; }
+
+        snap.forEach(doc => {
+            const ord = doc.data();
+            const id = doc.id;
+            list.innerHTML += `
+                <div class="order-card ${!ord.status ? 'new' : ''}">
+                    <div class="cust-name">${ord.customer_name}</div>
+                    <div class="cust-info">📞 ${ord.customer_mobile} | 📍 ${ord.customer_region || 'N/A'}</div>
+                    <div class="cust-info">📦 <b>Items:</b> ${ord.order_items}</div>
+                    <div class="cust-info">💳 <b>DP Paid:</b> ${ord.order_dp} | <b>Ref:</b> ${ord.gcash_ref}</div>
+                    <p>Current: <span class="status-now">${ord.status || 'Order Received'}</span></p>
+                    
+                    <select id="sel-${id}">
+                        <option value="">-- Update Status --</option>
+                        <option value="In Production / Crafting">🛠️ In Production / Crafting</option>
+                        <option value="Packing Order">📦 Packing Order</option>
+                        <option value="Ongoing / Shipping">🚚 Ongoing / Shipping</option>
+                        <option value="Arrived / Delivered">✅ Arrived / Delivered</option>
+                        <option value="Cancelled">❌ Cancelled</option>
+                    </select>
+                    <button onclick="updateStatus('${id}')">Update Order Status</button>
+                </div>
+            `;
+        });
+    }
+
+    async function updateStatus(id) {
+        const val = document.getElementById('sel-'+id).value;
+        if(!val) return alert("Select a status first.");
+        
+        await db.collection("orders").doc(id).update({
+            status: val,
+            status_update: new Date().toLocaleString()
+        });
+        alert("Success! Status changed to " + val);
+        loadOrders();
+    }
+
+    const p = prompt("Admin Password:");
+    if(p === "1234") loadOrders(); else document.body.innerHTML = "Access Denied.";
+</script>
+</body>
+</html>
+
