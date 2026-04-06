@@ -135,6 +135,17 @@
         document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
     }
 
+    async function applyPromo() {
+        const code = document.getElementById('promoCode').value.toUpperCase();
+        if(!code) return;
+        const doc = await db.collection("discounts").doc(code).get();
+        if(doc.exists) {
+            discountAmount = doc.data().amount;
+            updateUI();
+            alert("Promo Applied!");
+        } else { alert("Invalid Promo"); }
+    }
+
     async function finalizeOrder() {
         const ref = document.getElementById('refNo').value;
         const name = document.getElementById('cName').value;
@@ -152,8 +163,6 @@
         };
 
         await db.collection("orders").add(orderData);
-        
-        // Fixed Telegram Format
         const msg = `New Order:%0AItems: ${orderData.items}%0AName: ${orderData.customer_name}%0AAddress: ${orderData.address}%0ADP: ${orderData.dp_amount}%0ARef: ${orderData.ref_no}`;
         window.location.href = `https://t.me/murabilliardph?text=${msg}`;
     }
