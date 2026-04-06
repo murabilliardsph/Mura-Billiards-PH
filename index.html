@@ -25,18 +25,11 @@
         
         #cart-sidebar { position: fixed; right: -100%; top: 0; width: 100%; max-width: 400px; height: 100%; background: #0a0a0a; z-index: 1001; transition: 0.4s; padding: 20px; border-left: 2px solid var(--primary); overflow-y: auto; }
         #cart-sidebar.open { right: 0; }
-        
         .summary-box { background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222; font-size: 13px; }
-        .summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
         input, textarea, select { width: 100%; padding: 12px; margin-top: 10px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; }
         
-        /* Reviews with Stars */
-        #reviews-container { margin-top: 40px; border-top: 1px solid #222; padding-top: 20px; }
         .review-card { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #222; }
-        .review-name { color: var(--primary); font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }
-        .review-text { font-size: 13px; color: #ccc; margin-top: 5px; }
         .stars { color: #ffca28; font-size: 12px; }
-
         #cart-trigger { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: black; padding: 15px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1000; }
     </style>
 </head>
@@ -55,7 +48,7 @@
                 <h3>Mini Table (120x75cm)</h3>
                 <p class="price">₱1,500</p>
                 <span class="sf-tag">+ ₱185 Shipping Fee</span>
-                <div class="specs-box">2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.</div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Mini Table', 1500, 185)">Add to Cart</button>
             </div>
         </div>
@@ -65,7 +58,7 @@
                 <h3>Jr. Size 4x7 (Blue)</h3>
                 <p class="price">₱5,000</p>
                 <span class="sf-tag">+ ₱285 Shipping Fee</span>
-                <div class="specs-box">2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
@@ -75,7 +68,7 @@
                 <h3>Jr. Size 4x7 (Green)</h3>
                 <p class="price">₱5,000</p>
                 <span class="sf-tag">+ ₱285 Shipping Fee</span>
-                <div class="specs-box">2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button>
             </div>
         </div>
@@ -85,15 +78,15 @@
                 <h3>Jr. Size 4x7 (Black Edition)</h3>
                 <p class="price">₱6,500</p>
                 <span class="sf-tag">+ ₱285 Shipping Fee</span>
-                <div class="specs-box">2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
                 <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button>
             </div>
         </div>
     </div>
 
-    <div id="reviews-container">
-        <h3 style="margin-bottom:15px; color:var(--primary);">Verified Reviews</h3>
-        <div id="reviews-list">Loading...</div>
+    <div id="reviews-container" style="margin-top:40px;">
+        <h3 style="color:var(--primary); margin-bottom:15px;">Verified Reviews</h3>
+        <div id="reviews-list">Loading reviews...</div>
     </div>
 </div>
 
@@ -101,41 +94,28 @@
 
 <div id="cart-sidebar">
     <div id="step1">
-        <h3 style="color:var(--primary)">Order Info</h3>
+        <h3 style="color:var(--primary)">Order Details</h3>
         <input type="text" id="cName" placeholder="Full Name">
         <input type="text" id="cMobile" placeholder="Mobile Number">
         <textarea id="cAddr" placeholder="Complete Shipping Address"></textarea>
-        
         <select id="region" onchange="updateUI()">
-            <option value="0">Select Shipping Region</option>
             <option value="Luzon">Luzon</option>
             <option value="Visayas">Visayas</option>
             <option value="Mindanao">Mindanao</option>
         </select>
-
         <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
-
         <div class="summary-box">
-            <div class="summary-line"><span>Subtotal:</span> <span id="sub-val">₱0</span></div>
-            <div class="summary-line"><span>Shipping:</span> <span id="ship-val">₱0</span></div>
-            <div class="summary-line" style="color:var(--primary);"><span>Discount:</span> <span id="disc-val">-₱0</span></div>
-            <div class="summary-line" style="font-weight:bold; border-top:1px solid #333; padding-top:5px; margin-top:5px;">
-                <span>Total:</span> <span id="total-val">₱0</span>
-            </div>
+            <p>Total: <span id="total-val">₱0</span></p>
+            <p style="color:var(--primary)">DP (40%): <span id="dp-val">₱0</span></p>
         </div>
-        <button class="btn-add" onclick="goToStep(2)">Proceed to Payment</button>
-        <button onclick="toggleCart(false)" style="width:100%; background:none; color:#555; border:none; padding:10px;">Close</button>
+        <button class="btn-add" onclick="goToStep(2)">Next: Payment</button>
     </div>
-
-    <div id="step2" style="display:none;">
-        <h3 style="color:var(--primary)">40% Downpayment</h3>
-        <div style="background:#fff; padding:15px; text-align:center; border-radius:10px; margin-top:10px;">
-            <img src="images/qr-code.jpg" style="width:150px;">
-            <h2 style="color:#000; margin-top:10px;">DP: <span id="dp-val">₱0</span></h2>
-        </div>
-        <input type="text" id="refNo" placeholder="Gcash/Maya Ref Number">
-        <button class="btn-add" onclick="finalizeOrder()">Confirm & Send</button>
-        <button onclick="goToStep(1)" style="width:100%; background:none; color:#555; border:none; padding:10px;">Back</button>
+    <div id="step2" style="display:none; text-align:center;">
+        <h3 style="color:var(--primary)">Gcash DP Payment</h3>
+        <img src="images/qr-code.jpg" style="width:200px; margin:15px auto; display:block; border-radius:10px;">
+        <input type="text" id="refNo" placeholder="Gcash Ref Number">
+        <button class="btn-add" onclick="finalizeOrder()">Submit Order</button>
+        <button onclick="goToStep(1)" style="background:none; color:#555; border:none; margin-top:10px;">Back</button>
     </div>
 </div>
 
@@ -151,23 +131,16 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let cart = [], discountAmount = 0;
+    let cart = [], discount = 0;
 
-    function addToCart(name, price, sf) { cart.push({name, price, sf}); updateUI(); toggleCart(true); }
+    function addToCart(n, p, s) { cart.push({n, p, s}); updateUI(); toggleCart(true); }
     function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
-    function goToStep(s) {
-        document.getElementById('step1').style.display = s === 1 ? 'block' : 'none';
-        document.getElementById('step2').style.display = s === 2 ? 'block' : 'none';
-    }
+    function goToStep(s) { document.getElementById('step1').style.display=s==1?'block':'none'; document.getElementById('step2').style.display=s==2?'block':'none'; }
 
     function updateUI() {
-        let sub = 0, shipping = 0;
-        cart.forEach(i => { sub += i.price; shipping += i.sf; });
-        let total = (sub + shipping) - discountAmount;
+        let total = 0; cart.forEach(i => total += (i.p + i.s));
+        total -= discount;
         document.getElementById('cart-count').innerText = cart.length;
-        document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
-        document.getElementById('ship-val').innerText = "₱" + shipping.toLocaleString();
-        document.getElementById('disc-val').innerText = "-₱" + discountAmount.toLocaleString();
         document.getElementById('total-val').innerText = "₱" + (total > 0 ? total : 0).toLocaleString();
         document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
     }
@@ -175,42 +148,32 @@
     async function applyPromo() {
         const code = document.getElementById('promoCode').value.toUpperCase();
         const doc = await db.collection("discounts").doc(code).get();
-        if(doc.exists) { discountAmount = doc.data().amount; updateUI(); }
+        if(doc.exists) { discount = doc.data().amount; updateUI(); alert("Promo Applied!"); }
     }
 
-    // LOAD REVIEWS WITH STARS
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
-        const list = document.getElementById('reviews-list');
-        list.innerHTML = "";
+        const list = document.getElementById('reviews-list'); list.innerHTML = "";
         snap.forEach(doc => {
             const r = doc.data();
-            list.innerHTML += `
-                <div class="review-card">
-                    <div class="review-name">${r.name} <span class="stars">⭐⭐⭐⭐⭐</span></div>
-                    <div class="review-text">${r.comment}</div>
-                </div>`;
+            list.innerHTML += `<div class="review-card"><b>${r.name} <span class="stars">⭐⭐⭐⭐⭐</span></b><p>${r.comment}</p></div>`;
         });
     });
 
     async function finalizeOrder() {
-        const ref = document.getElementById('refNo').value;
-        if(!ref) return alert("Enter Ref No.");
-
         const orderData = {
             name: document.getElementById('cName').value,
             mobile: document.getElementById('cMobile').value,
             address: document.getElementById('cAddr').value,
             region: document.getElementById('region').value,
-            items: cart.map(i=>i.name).join(", "),
+            items: cart.map(i=>i.n).join(", "),
             total: document.getElementById('total-val').innerText,
             dp: document.getElementById('dp-val').innerText,
-            ref: ref,
+            ref: document.getElementById('refNo').value,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-
+        if(!orderData.name || !orderData.ref) return alert("Fill all details!");
         await db.collection("orders").add(orderData);
-        const msg = `⭐ NEW ORDER ⭐%0A👤 Name: ${orderData.name}%0A📞 Mobile: ${orderData.mobile}%0A📍 Addr: ${orderData.address}%0A🚚 Region: ${orderData.region}%0A🛒 Items: ${orderData.items}%0A💰 Total: ${orderData.total}%0A💳 DP: ${orderData.dp}%0A🧾 Ref: ${orderData.ref}`;
-        window.location.href = `https://t.me/murabilliardph?text=${msg}`;
+        window.location.href = `https://t.me/murabilliardph?text=⭐ NEW ORDER ⭐%0A👤 Name: ${orderData.name}%0A📞 Mobile: ${orderData.mobile}%0A📍 Addr: ${orderData.address}%0A🚚 Region: ${orderData.region}%0A🛒 Items: ${orderData.items}%0A💰 Total: ${orderData.total}%0A💳 DP: ${orderData.dp}%0A🧾 Ref: ${orderData.ref}`;
     }
 </script>
 </body>
