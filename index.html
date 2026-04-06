@@ -28,6 +28,8 @@
         .checkout-step { display: none; }
         .checkout-step.active { display: block; }
         input, textarea, select { width: 100%; padding: 14px; margin-top: 12px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; }
+        .summary-box { background: #111; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #222; font-size: 13px; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 5px; }
         .qr-section { margin-top: 20px; text-align: center; background: #fff; padding: 15px; border-radius: 10px; color: #000; }
         #cart-trigger { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: black; padding: 18px 25px; border-radius: 50px; cursor: pointer; font-weight: bold; z-index: 1000; }
     </style>
@@ -47,7 +49,7 @@
                 <h3>Mini Table (120x75cm)</h3>
                 <p class="price">₱1,500</p>
                 <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (112cm), 16 Balls (38mm), 2 Chalk, Brush, Triangle.</div>
-                <button class="btn-add" onclick="addToCart('Mini Table (120x75cm)', 1500, 185)">Add to Cart</button>
+                <button class="btn-add" onclick="addToCart('Mini Table', 1500)">Add to Cart</button>
             </div>
         </div>
         <div class="product-card">
@@ -56,52 +58,57 @@
                 <h3>Jr. Size 4x7 (Blue)</h3>
                 <p class="price">₱5,000</p>
                 <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
-                <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000, 285)">Add to Cart</button>
+                <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000)">Add to Cart</button>
             </div>
         </div>
-        <div class="product-card">
-            <img src="images/jr-green.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Jr. Size 4x7 (Green)</h3>
-                <p class="price">₱5,000</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
-                <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000, 285)">Add to Cart</button>
-            </div>
         </div>
-        <div class="product-card">
-            <img src="images/jr-black.jpg" class="product-img">
-            <div class="p-info">
-                <h3>Jr. Size 4x7 (Black Edition)</h3>
-                <p class="price">₱6,500</p>
-                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
-                <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500, 285)">Add to Cart</button>
-            </div>
-        </div>
-    </div>
-    <div id="reviews-placeholder" style="margin-top:50px;"></div>
 </div>
 
 <div id="cart-trigger" onclick="toggleCart(true)">🛒 VIEW CART (<span id="cart-count">0</span>)</div>
 
 <div id="cart-sidebar">
     <div class="step-indicator"><span id="st1" class="active">1. DETAILS</span><span id="st2">2. PAYMENT</span></div>
+    
     <div id="step1" class="checkout-step active">
         <div id="cart-items-list"></div>
         <input type="text" id="cName" placeholder="Full Name">
         <input type="text" id="cMobile" placeholder="Mobile Number">
         <textarea id="cAddr" placeholder="Complete Shipping Address"></textarea>
+        
+        <select id="region" onchange="updateUI()">
+            <option value="0">Select Shipping Region</option>
+            <option value="500">Luzon (2-4 Days Shipping)</option>
+            <option value="800">Visayas (5-7 Days Shipping)</option>
+            <option value="1200">Mindanao (7-10 Days Shipping)</option>
+        </select>
+
         <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
+
+        <div class="summary-box">
+            <div class="summary-line"><span>Subtotal:</span> <span id="sub-val">₱0</span></div>
+            <div class="summary-line"><span>Shipping:</span> <span id="ship-val">₱0</span></div>
+            <div class="summary-line" style="color:var(--primary);"><span>Discount:</span> <span id="disc-val">-₱0</span></div>
+            <div class="summary-line" style="font-weight:bold; border-top:1px solid #333; padding-top:5px; margin-top:5px;">
+                <span>Total:</span> <span id="total-val">₱0</span>
+            </div>
+        </div>
         <button class="btn-add" onclick="goToStep(2)">Next: Payment</button>
     </div>
+
     <div id="step2" class="checkout-step">
-        <div class="qr-section">
-            <img src="images/qr-code.jpg" style="width:180px;">
-            <h3 style="margin-top:10px;">DP: <span id="dp-val">₱0</span></h3>
+        <div style="font-size:12px; color:#aaa; margin-bottom:10px;">
+            <b>NOTICE:</b> All tables are <b>Made-To-Order</b>. A 40% Downpayment is required to confirm your slot.
         </div>
-        <input type="text" id="refNo" placeholder="Gcash/Maya Ref Number">
-        <label style="font-size:11px;"><input type="checkbox" id="terms-check"> Correct details.</label>
-        <button class="btn-add" onclick="finalizeOrder()">Submit Order</button>
-        <button onclick="goToStep(1)" style="width:100%; background:none; color:#555; border:none; padding:10px;">Back</button>
+        <div class="qr-section">
+            <img src="images/qr-code.jpg" style="width:160px;">
+            <h3 style="margin-top:10px;">REQUIRED DP: <span id="dp-val" style="color:#d32f2f;">₱0</span></h3>
+        </div>
+        <input type="text" id="refNo" placeholder="Gcash/Maya Reference Number">
+        <label style="font-size:11px; display:block; margin-top:15px;">
+            <input type="checkbox" id="terms-check"> I agree to the <b>Terms & Conditions</b> (Non-refundable DP for cancellations).
+        </label>
+        <button class="btn-add" onclick="finalizeOrder()">Confirm Order</button>
+        <button onclick="goToStep(1)" style="width:100%; background:none; color:#555; border:none; padding:10px; cursor:pointer;">Back to Details</button>
     </div>
 </div>
 
@@ -119,19 +126,30 @@
 
     let cart = [], discountAmount = 0;
 
-    function addToCart(name, price, ship) { cart.push({id:Date.now(), name, price, ship}); updateUI(); toggleCart(true); }
+    function addToCart(name, price) { cart.push({id:Date.now(), name, price}); updateUI(); toggleCart(true); }
     function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
+    
     function goToStep(s) {
-        if(s===2 && (!document.getElementById('cName').value || cart.length === 0)) return alert("Check name and cart!");
+        if(s===2 && (!document.getElementById('cName').value || cart.length === 0 || document.getElementById('region').value === "0")) {
+            return alert("Please fill name, cart, and shipping region.");
+        }
         document.querySelectorAll('.checkout-step').forEach(x=>x.classList.remove('active'));
         document.getElementById('step'+s).classList.add('active');
+        document.getElementById('st1').classList.toggle('active', s===1);
+        document.getElementById('st2').classList.toggle('active', s===2);
     }
 
     function updateUI() {
-        let sub=0, ship=0;
-        cart.forEach(i=>{ sub+=i.price; ship+=i.ship; });
-        const total = (sub+ship)-discountAmount;
+        let sub = 0;
+        cart.forEach(i => sub += i.price);
+        let ship = parseInt(document.getElementById('region').value);
+        let total = (sub + ship) - discountAmount;
+        
         document.getElementById('cart-count').innerText = cart.length;
+        document.getElementById('sub-val').innerText = "₱" + sub.toLocaleString();
+        document.getElementById('ship-val').innerText = "₱" + ship.toLocaleString();
+        document.getElementById('disc-val').innerText = "-₱" + discountAmount.toLocaleString();
+        document.getElementById('total-val').innerText = "₱" + (total > 0 ? total : 0).toLocaleString();
         document.getElementById('dp-val').innerText = "₱" + (total * 0.4).toLocaleString();
     }
 
@@ -142,28 +160,27 @@
         if(doc.exists) {
             discountAmount = doc.data().amount;
             updateUI();
-            alert("Promo Applied!");
-        } else { alert("Invalid Promo"); }
+            alert("Promo Code Applied!");
+        } else { alert("Invalid Promo Code"); }
     }
 
     async function finalizeOrder() {
         const ref = document.getElementById('refNo').value;
-        const name = document.getElementById('cName').value;
-        const addr = document.getElementById('cAddr').value;
-        if(!ref || !name || !addr) return alert("Fill all fields!");
+        if(!ref || !document.getElementById('terms-check').checked) return alert("Please enter Reference No. and agree to Terms.");
 
         const orderData = {
-            customer_name: name,
+            customer_name: document.getElementById('cName').value,
             mobile: document.getElementById('cMobile').value,
-            address: addr,
+            address: document.getElementById('cAddr').value,
             items: cart.map(i=>i.name).join(", "),
+            total_payable: document.getElementById('total-val').innerText,
             dp_amount: document.getElementById('dp-val').innerText,
             ref_no: ref,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
         await db.collection("orders").add(orderData);
-        const msg = `New Order:%0AItems: ${orderData.items}%0AName: ${orderData.customer_name}%0AAddress: ${orderData.address}%0ADP: ${orderData.dp_amount}%0ARef: ${orderData.ref_no}`;
+        const msg = `NEW ORDER%0AItems: ${orderData.items}%0AName: ${orderData.customer_name}%0AAddress: ${orderData.address}%0ADP Paid: ${orderData.dp_amount}%0ARef: ${orderData.ref_no}`;
         window.location.href = `https://t.me/murabilliardph?text=${msg}`;
     }
 </script>
