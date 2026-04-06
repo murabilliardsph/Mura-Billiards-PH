@@ -32,6 +32,7 @@
         
         .tc-box { font-size: 11px; color: #888; background: #111; padding: 10px; border-radius: 5px; border: 1px solid #333; margin-top: 15px; }
         .step-2 { display: none; }
+        .review-card { background: #111; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -127,13 +128,24 @@
     <div class="step-2" id="step-2">
         <button class="back-btn" onclick="goToStep1()">← Back to Details</button>
         <h3 style="color:var(--primary);">GCASH PAYMENT</h3>
-        <p style="font-size:12px; margin-bottom:10px;">Scan QR to pay the 40% Downpayment.</p>
+        
+        <div style="text-align:center; background:#111; padding:15px; border-radius:10px; margin-bottom:15px;">
+            <p style="font-size:12px; color:#888;">Amount to Pay (DP):</p>
+            <h2 id="pay-dp-val" style="color:var(--primary);">₱0</h2>
+            <p style="font-size:10px; color:#666;">Total Order: <span id="pay-total-val">₱0</span></p>
+        </div>
+
         <div style="text-align:center;">
-    <img src="images/qr-code.jpg" style="width:200px; border-radius:10px; margin-bottom:15px; border: 1px solid #333;">
-    <input type="text" id="refNo" placeholder="GCash Reference Number">
-    <button class="btn-add" onclick="finalizeOrder()">Place Order Now</button>
-     
-     </div>
+            <img src="images/qr-code.jpg" style="width:180px; border-radius:10px; margin-bottom:15px; border: 1px solid #333;">
+            <input type="text" id="refNo" placeholder="GCash Reference Number">
+            
+            <div style="margin-top:15px; text-align:left; font-size:11px; color:#aaa;">
+                <input type="checkbox" id="agreeTC" style="width:auto; margin-top:0;"> 
+                <label for="agreeTC">I agree that this is Made-to-Order and DP is non-refundable once processed.</label>
+            </div>
+
+            <button class="btn-add" onclick="finalizeOrder()">Place Order Now</button>
+        </div>
     </div>
 </div>
 
@@ -152,12 +164,14 @@
     let cart = [], discount = 0;
 
     function toggleCart(s) { document.getElementById('cart-sidebar').classList.toggle('open', s); }
+    
     function goToStep2() {
         if(!document.getElementById('cName').value || !document.getElementById('cAddr').value) return alert("Fill up name and address!");
         if(cart.length === 0) return alert("Cart is empty!");
         document.getElementById('step-1').style.display = 'none';
         document.getElementById('step-2').style.display = 'block';
     }
+
     function goToStep1() {
         document.getElementById('step-1').style.display = 'block';
         document.getElementById('step-2').style.display = 'none';
@@ -168,20 +182,30 @@
     function updateUI() {
         let total = 0; cart.forEach(i => total += (i.p + i.s));
         total -= discount;
+        const finalTotal = "₱" + (total > 0 ? total : 0).toLocaleString();
+        const finalDP = "₱" + Math.floor(total * 0.4).toLocaleString();
+
         document.getElementById('cart-count').innerText = cart.length;
-        document.getElementById('total-val').innerText = "₱" + (total > 0 ? total : 0).toLocaleString();
-        document.getElementById('dp-val').innerText = "₱" + Math.floor(total * 0.4).toLocaleString();
+        document.getElementById('total-val').innerText = finalTotal;
+        document.getElementById('dp-val').innerText = finalDP;
+        document.getElementById('pay-total-val').innerText = finalTotal;
+        document.getElementById('pay-dp-val').innerText = finalDP;
     }
 
     async function applyPromo() {
-        const code = document.getElementById('promoCode').value.toUpperCase();
+        const code = document.getElementById('promoCode').value.toUpperCase().trim();
+        if(!code) return;
         const doc = await db.collection("discounts").doc(code).get();
         if(doc.exists) { discount = doc.data().amount; updateUI(); alert("Promo Applied!"); }
+        else { alert("Invalid Code"); }
     }
 
     async function finalizeOrder() {
         const ref = document.getElementById('refNo').value;
+        const agreed = document.getElementById('agreeTC').checked;
+
         if(!ref) return alert("Enter GCash Reference Number!");
+        if(!agreed) return alert("Please check the Terms & Conditions box.");
 
         const orderData = {
             customer_name: document.getElementById('cName').value,
@@ -193,8 +217,19 @@
             gcash_ref: ref,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
+
         await db.collection("orders").add(orderData);
-        window.location.href = `https://t.me/murabilliardph?text=⭐NEW ORDER⭐%0AName: ${orderData.customer_name}%0ADP: ${orderData.order_dp}%0ARef: ${ref}`;
+        
+        const msg = `⭐ NEW ORDER RECEIVED ⭐%0A%0A` +
+                    `👤 Name: ${orderData.customer_name}%0A` +
+                    `📞 Mobile: ${orderData.customer_mobile}%0A` +
+                    `📍 Address: ${orderData.customer_address}%0A` +
+                    `📦 Items: ${orderData.order_items}%0A%0A` +
+                    `💰 Total: ${orderData.order_total}%0A` +
+                    `💳 DP Paid: ${orderData.order_dp}%0A` +
+                    `📝 Ref No: ${ref}`;
+
+        window.location.href = `https://t.me/murabilliardph?text=${msg}`;
     }
 
     db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snap => {
@@ -206,4 +241,5 @@
     });
 </script>
 </body>
-</html>
+    </html>
+    
