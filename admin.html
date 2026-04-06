@@ -3,71 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mura Billiards PH | Owner Dashboard</title>
+    <title>Owner Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #00c853; --dark: #0a0a0a; --card: #151515; --text: #eee; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
-        body { background: var(--dark); color: var(--text); padding: 15px; }
-        
-        h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); }
-        
-        .section { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #222; margin-bottom: 20px; }
-        
-        .order-card { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--primary); position: relative; font-size: 14px; }
-        
-        .rev-box { text-align: center; border: 1px solid var(--primary); padding: 20px; background: rgba(0,200,83,0.05); }
-        .rev-box h2 { font-size: 2rem; }
-
-        input, textarea { width: 100%; padding: 12px; margin-top: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 8px; font-size: 14px; }
-        
-        button { background: var(--primary); padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; color: black; text-transform: uppercase; }
-        
-        .del-btn { background: #ff3d00; width: auto; padding: 5px 12px; font-size: 12px; margin-top: 5px; color: white; }
-
-        .list-item { background: #1a1a1a; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; font-size: 13px; }
-
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-box { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid var(--primary); text-align: center; width: 100%; max-width: 350px; }
+        body { background: var(--dark); color: var(--text); padding: 15px; font-family: sans-serif; }
+        .section { background: var(--card); padding: 15px; border-radius: 10px; border: 1px solid #222; margin-bottom: 15px; }
+        .order-card { background: #111; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--primary); font-size: 13px; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 8px; background: #222; color: white; border: 1px solid #444; border-radius: 5px; }
+        button { background: var(--primary); padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 2000; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
     <div id="login-overlay">
-        <div class="login-box">
-            <h3>ADMIN ACCESS</h3>
-            <input type="password" id="pass" placeholder="Enter Password">
-            <button onclick="check()">LOGIN</button>
+        <div style="background:var(--card); padding:30px; border-radius:15px; border:1px solid var(--primary); text-align:center;">
+            <h3>OWNER LOGIN</h3><input type="password" id="pass" placeholder="Password"><button onclick="check()">ENTER</button>
         </div>
     </div>
 
     <div id="main-content" style="display:none;">
-        <div class="section rev-box">
-            <p style="font-size: 12px; color: #888;">TOTAL DP REVENUE</p>
-            <h2 id="rev-total">₱0</h2>
-        </div>
-
-        <div class="section">
-            <h3>Orders Tracker</h3>
-            <div id="order-list" style="margin-top:10px;">Loading orders...</div>
-        </div>
-
-        <div class="section">
-            <h3>Promo Management</h3>
-            <input id="vCode" placeholder="Promo Code">
-            <input type="number" id="vAmt" placeholder="Discount (₱)">
-            <button onclick="addV()">Save Voucher</button>
-            <div id="v-list"></div>
-        </div>
-
-        <div class="section">
-            <h3>Post ⭐⭐⭐⭐⭐ Review</h3>
-            <input id="rName" placeholder="Customer Name">
-            <textarea id="rText" placeholder="Comment/Feedback" rows="3"></textarea>
-            <button onclick="addR()">Post to Shop</button>
-            <div id="r-list"></div>
-        </div>
+        <div class="section"><h2>Total DP Revenue: <span id="rev-total" style="color:var(--primary)">₱0</span></h2></div>
+        <div class="section"><h3>Recent Orders</h3><div id="order-list"></div></div>
+        <div class="section"><h3>Post Review</h3><input id="rName" placeholder="Name"><textarea id="rText" placeholder="Comment"></textarea><button onclick="addR()">Post Review</button></div>
     </div>
 
     <script>
@@ -82,86 +41,32 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        function check() { 
-            if(document.getElementById('pass').value === "mura2026") { 
-                document.getElementById('login-overlay').style.display='none'; 
-                document.getElementById('main-content').style.display='block'; 
-            } else { alert("Incorrect Password"); } 
-        }
+        function check() { if(document.getElementById('pass').value === "mura2026") { document.getElementById('login-overlay').style.display='none'; document.getElementById('main-content').style.display='block'; } }
 
-        // Live Orders & Revenue Sync
         db.collection("orders").orderBy("timestamp", "desc").onSnapshot(snap => {
             const list = document.getElementById('order-list');
-            let rev = 0; 
-            list.innerHTML = "";
-            
+            let rev = 0; list.innerHTML = "";
             snap.forEach(doc => {
                 const o = doc.data();
-                // Clean the DP string to get number for revenue
-                const cleanDP = parseFloat(o.order_dp?.replace(/[^\d]/g, '')) || 0;
-                rev += cleanDP;
-
+                const dpAmt = parseFloat(o.order_dp?.replace(/[^\d.-]/g, '')) || 0;
+                rev += dpAmt;
                 list.innerHTML += `
                 <div class="order-card">
-                    <b style="color:var(--primary);">${o.customer_name || 'No Name'}</b><br>
-                    <small>${o.customer_mobile || 'No Phone'}</small><br>
-                    <div style="margin: 8px 0; font-weight:bold;">${o.order_items || 'No Items'}</div>
-                    <div style="font-size:12px; color:#aaa;">Ref: ${o.gcash_ref || 'N/A'}</div>
-                    <div style="color:var(--primary); margin-top:5px;">DP: ₱${cleanDP.toLocaleString()}</div>
-                    <button class="del-btn" onclick="delDoc('orders', '${doc.id}')">Delete Order</button>
+                    <b>Name:</b> ${o.customer_name}<br>
+                    <b>Mobile:</b> ${o.customer_mobile}<br>
+                    <b>Addr:</b> ${o.customer_address}<br>
+                    <b>Items:</b> ${o.order_items}<br>
+                    <b>Ref:</b> ${o.gcash_ref}<br>
+                    <b>DP:</b> ${o.order_dp}
+                    <button onclick="db.collection('orders').doc('${doc.id}').delete()" style="background:red; color:white; width:auto; padding:3px 10px; margin-top:5px; display:block;">Delete</button>
                 </div>`;
             });
             document.getElementById('rev-total').innerText = "₱" + rev.toLocaleString();
         });
 
-        // List Vouchers
-        db.collection("discounts").onSnapshot(s => {
-            const l=document.getElementById('v-list'); l.innerHTML="";
-            s.forEach(d => {
-                l.innerHTML+=`<div class="list-item">
-                    <span><b>${d.id}</b> (-₱${d.data().amount})</span>
-                    <button class="del-btn" onclick="delDoc('discounts','${d.id}')" style="margin:0;">Del</button>
-                </div>`;
-            });
-        });
-
-        // List Reviews
-        db.collection("reviews").orderBy("timestamp","desc").onSnapshot(s => {
-            const l=document.getElementById('r-list'); l.innerHTML="";
-            s.forEach(d => {
-                l.innerHTML+=`<div class="list-item">
-                    <span>⭐⭐⭐⭐⭐ | ${d.data().name || 'Anon'}</span>
-                    <button class="del-btn" onclick="delDoc('reviews','${d.id}')" style="margin:0;">Del</button>
-                </div>`;
-            });
-        });
-
-        async function addV() { 
-            const c=document.getElementById('vCode').value; 
-            const a=document.getElementById('vAmt').value; 
-            if(c && a) {
-                await db.collection("discounts").doc(c.toUpperCase()).set({amount:parseInt(a)});
-                alert("Voucher Saved!");
-            }
-        }
-
-        async function addR() { 
-            const n=document.getElementById('rName').value; 
-            const t=document.getElementById('rText').value; 
-            if(n && t) {
-                await db.collection("reviews").add({
-                    name: n, 
-                    comment: t, 
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert("Review Posted!");
-                document.getElementById('rName').value = "";
-                document.getElementById('rText').value = "";
-            }
-        }
-
-        async function delDoc(c,i) { 
-            if(confirm("Confirm Delete?")) await db.collection(c).doc(i).delete(); 
+        async function addR() {
+            const n=document.getElementById('rName').value; const t=document.getElementById('rText').value;
+            if(n && t) await db.collection("reviews").add({name:n, comment:t, timestamp:firebase.firestore.FieldValue.serverTimestamp()});
         }
     </script>
 </body>
