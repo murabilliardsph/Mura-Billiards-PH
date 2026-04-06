@@ -55,7 +55,6 @@
                 </select>
                 <textarea id="revText" placeholder="Review content..."></textarea>
                 <button class="btn" onclick="postReview()">Post Review</button>
-                <div id="admin-reviews-list" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
             </div>
         </div>
 
@@ -114,8 +113,10 @@
             list.innerHTML = "";
             snap.forEach(doc => {
                 const o = doc.data();
-                // Fix for Revenue Calculation: tinatanggal ang symbols bago i-plus
-                const dpClean = parseFloat(o.dp_amount.replace(/[^\d.-]/g, '')) || 0;
+                
+                // FIXED REVENUE MATH: Tinatanggal ang symbols bago i-parse
+                let rawValue = o.dp_amount ? o.dp_amount.toString() : "0";
+                const dpClean = parseFloat(rawValue.replace(/[^\d.-]/g, '')) || 0;
                 revenue += dpClean;
 
                 list.innerHTML += `<div class="order-card">
