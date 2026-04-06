@@ -52,6 +52,7 @@
                 <button class="btn-add" onclick="addToCart('Mini Table', 1500)">Add to Cart</button>
             </div>
         </div>
+
         <div class="product-card">
             <img src="images/jr-blue.jpg" class="product-img">
             <div class="p-info">
@@ -61,7 +62,27 @@
                 <button class="btn-add" onclick="addToCart('Jr. Blue 4x7', 5000)">Add to Cart</button>
             </div>
         </div>
+
+        <div class="product-card">
+            <img src="images/jr-green.jpg" class="product-img">
+            <div class="p-info">
+                <h3>Jr. Size 4x7 (Green)</h3>
+                <p class="price">₱5,000</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <button class="btn-add" onclick="addToCart('Jr. Green 4x7', 5000)">Add to Cart</button>
+            </div>
         </div>
+
+        <div class="product-card">
+            <img src="images/jr-black.jpg" class="product-img">
+            <div class="p-info">
+                <h3>Jr. Size 4x7 (Black Edition)</h3>
+                <p class="price">₱6,500</p>
+                <div class="specs-box"><b>INCLUSIONS:</b> 2 Cue (Std), 16 Balls (Std), 2 Chalk, Brush, Triangle.</div>
+                <button class="btn-add" onclick="addToCart('Jr. Black 4x7', 6500)">Add to Cart</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="cart-trigger" onclick="toggleCart(true)">🛒 VIEW CART (<span id="cart-count">0</span>)</div>
@@ -77,9 +98,9 @@
         
         <select id="region" onchange="updateUI()">
             <option value="0">Select Shipping Region</option>
-            <option value="500">Luzon (2-4 Days Shipping)</option>
-            <option value="800">Visayas (5-7 Days Shipping)</option>
-            <option value="1200">Mindanao (7-10 Days Shipping)</option>
+            <option value="500">Luzon (2-4 Days Shipping) - ₱500</option>
+            <option value="800">Visayas (5-7 Days Shipping) - ₱800</option>
+            <option value="1200">Mindanao (7-10 Days Shipping) - ₱1,200</option>
         </select>
 
         <input type="text" id="promoCode" placeholder="Promo Code?" onchange="applyPromo()">
@@ -105,7 +126,7 @@
         </div>
         <input type="text" id="refNo" placeholder="Gcash/Maya Reference Number">
         <label style="font-size:11px; display:block; margin-top:15px;">
-            <input type="checkbox" id="terms-check"> I agree to the <b>Terms & Conditions</b> (Non-refundable DP for cancellations).
+            <input type="checkbox" id="terms-check"> I agree to the <b>Terms & Conditions</b> (Made-to-order basis; DP is non-refundable for cancellations).
         </label>
         <button class="btn-add" onclick="finalizeOrder()">Confirm Order</button>
         <button onclick="goToStep(1)" style="width:100%; background:none; color:#555; border:none; padding:10px; cursor:pointer;">Back to Details</button>
@@ -131,7 +152,7 @@
     
     function goToStep(s) {
         if(s===2 && (!document.getElementById('cName').value || cart.length === 0 || document.getElementById('region').value === "0")) {
-            return alert("Please fill name, cart, and shipping region.");
+            return alert("Please fill name, cart, and select shipping region.");
         }
         document.querySelectorAll('.checkout-step').forEach(x=>x.classList.remove('active'));
         document.getElementById('step'+s).classList.add('active');
@@ -160,7 +181,7 @@
         if(doc.exists) {
             discountAmount = doc.data().amount;
             updateUI();
-            alert("Promo Code Applied!");
+            alert("Promo Applied!");
         } else { alert("Invalid Promo Code"); }
     }
 
